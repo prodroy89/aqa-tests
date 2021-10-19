@@ -357,7 +357,7 @@ fi
 					if tar --version 2>&1 | grep GNU 2>&1; then
 						gzip -cd $jar_name | tar xof - -C $extract_dir --strip 1
 					else
-						mkdir dir.$$ && cd dir.$$ && gzip -cd ../$jar_name | tar xof - && cd * && tar cf - . | (cd ../../$extract_dir && tar xpf -) && cd ../.. && rm -rf dir.$$
+						mkdir dir.$$ && cd dir.$$ && gzip -cd ../$jar_name | /usr/bin/tar xof - && cd * && /usr/bin/tar cf - . | (cd ../../$extract_dir && /usr/bin/tar xpf -) && cd ../.. && rm -rf dir.$$
 					fi
 				fi
 			else

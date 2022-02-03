@@ -33,7 +33,7 @@ usage () {
 	echo 'Usage : external.sh  --dir TESTDIR --tag DOCKERIMAGE_TAG --version JDK_VERSION --impl JDK_IMPL [--reportsrc appReportDir] [--reportdst REPORTDIR] [--testtarget target] [--docker_args EXTRA_DOCKER_ARGS] [--build|--run|--clean]'
 }
 
-supported_tests="external_custom camel derby elasticsearch jacoco jenkins functional-test kafka lucene-solr openliberty-mp-tck payara-mp-tck quarkus quarkus_quickstarts scala system-test thorntail-mp-tck tomcat tomee wildfly wycheproof netty spring"
+supported_tests="external_custom camel derby elasticsearch jacoco jenkins functional-test kafka lucene-solr openliberty-mp-tck payara-mp-tck quarkus quarkus_quickstarts scala system-test tomcat tomee wildfly wycheproof netty spring"
 
 function check_test() {
     test=$1
@@ -125,28 +125,10 @@ function parse_tag() {
     		package=jre
 		;;
 	esac
-	# set BUILD_TYPE
-	case $tag in
-   		*-slim*|*_slim*) 
-   			build_type=slim
-   		;;
-	esac
+	
 	# set DOCKER_OS
 	case $tag in
-   		*alpine*) 
-	   		docker_os=alpine;;
-   		*debianslim*) 
-	   		docker_os=debianslim;;
-		*debian*) 
-	   		docker_os=debian;;
-		*centos*) 
-	   		docker_os=centos;;
-		*clefos*) 
-	   		docker_os=clefos;;
-		*ubi-minimal*) 
-	   		docker_os=ubi-minimal;;
-		*ubi*) 
-	   		docker_os=ubi;;
+	
 		*ubuntu*|*latest*|*nightly*) 
 	   		docker_os=ubuntu;;
    		*) echo "Unable to recognize DOCKER_OS from DOCKERIMAGE_TAG = $tag!";;

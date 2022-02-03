@@ -20,6 +20,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.ArrayList;
@@ -41,6 +44,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
+import java.io.FileNotFoundException;
 
 public class JavaTestRunner {
 	private static String testJdk;
@@ -224,42 +228,49 @@ public class JavaTestRunner {
 
 		testSuiteFolder = "JCK-" + testSuite.toString().toLowerCase() + "-" + jckVersionNo;
 		jckBase = jckRoot + File.separator + testSuiteFolder; 
-		jckPolicyFileFullPath = jckRoot + File.separator + testSuiteFolder + File.separator + "lib" + File.separator + "jck.policy";
-		javatestJarFullPath = jckRoot + File.separator + testSuiteFolder + File.separator + "lib" + File.separator + "javatest.jar";
-		jtliteJarFullPath = jckRoot + File.separator + testSuiteFolder + File.separator + "lib" + File.separator + "jtlite.jar"; 
-		classesFullPath = jckRoot + File.separator + testSuiteFolder + File.separator + "classes";
+		jckPolicyFileFullPath = jckBase + File.separator + "lib" + File.separator + "jck.policy";
+		javatestJarFullPath = jckBase + File.separator + "lib" + File.separator + "javatest.jar";
+		jtliteJarFullPath = jckBase + File.separator + "lib" + File.separator + "jtlite.jar"; 
+		classesFullPath = jckBase + File.separator + "classes";
 		nativesLoc = jckRoot + File.separator + "natives" + File.separator + platform;
+		// Solaris natives are in /natives/sunos
+		if (platform.equals("solaris")) {
+			nativesLoc = jckRoot + File.separator + "natives" + File.separator + "sunos";
+		}
 		jtiFile = testRoot + File.separator + "jck" + File.separator + "jtrunner" + File.separator + CONFIG + File.separator + jckVersion + File.separator + testSuite.toLowerCase() + ".jti"; 
-		fileUrl = "file:///" + testSuiteFolder + "/testsuite.jtt";
+		fileUrl = "file:///" + jckBase + "/testsuite.jtt";
 
 		// The first release of a JCK will have an initial excludes (.jtx) file in test-suite/lib - e.g. JCK-runtime-8b/lib/jck8b.jtx.
 		// Updates to the excludes list may subsequently be supplied as a separate file, which supersedes the initial file.
 		// A known failures list (.kfl) file is optional.
 		// The automation here adds any files found (initial or updates) as 'custom' files. 
 		initialJtxFullPath = jckBase + "/lib/" + jckVersion + ".jtx";
+		File initialJtxFile = new File(initialJtxFullPath);
+
+		if (initialJtxFile.exists()) {
+			System.out.println("Using initial excludes list file " + initialJtxFullPath);
+		} else {
+			System.out.println("Unable to find initial excludes list file " + initialJtxFullPath);
+			initialJtxFullPath = "";
+		}
 
 		// Look for an update to the initial excludes file
-		if (jckVersion.contains("jck6") || jckVersion.contains("jck7")) {
-			jtxRelativePath = "excludes/jdk" + jckVersionNo + ".jtx";
-			kflRelativePath = "excludes/jdk" + jckVersionNo + ".kfl";
-		} else {
-			jtxRelativePath = "excludes/jck" + jckVersionNo + ".jtx";
-			kflRelativePath = "excludes/jck" + jckVersionNo + ".kfl";
-		}
-		
+		jtxRelativePath = "excludes/" + jckVersion + ".jtx";
+		kflRelativePath = "excludes/" + jckVersion + ".kfl";
+
 		jtxFullPath = jckRoot + File.separator + jtxRelativePath; 
-		File jtxFile = new File(jtxFullPath); 
+		File jtxFile = new File(jtxFullPath);
 		
-		if (jtxFile.exists()) { 
-			System.out.println("Using excludes list file " + jtxFullPath);
+		if (jtxFile.exists()) {
+			System.out.println("Using additional excludes list file " + jtxFullPath);
 		} else {
-			System.out.println("Unable to find excludes list file " + jtxFullPath);
+			System.out.println("Unable to find additional excludes list file " + jtxFullPath);
 			jtxFullPath = "";
 		}
 
 		// Look for a known failures list file
 		kflFullPath = jckRoot + File.separator + kflRelativePath;
-		File kflFile = new File(kflFullPath); 
+		File kflFile = new File(kflFullPath);
 		
 		if (kflFile.exists()) { 
 			System.out.println("Using known failures list file " + kflFullPath);
@@ -312,6 +323,32 @@ public class JavaTestRunner {
 			secPropsFile = resultDir + File.separator + "security.properties";
 			System.out.println("Custom security properties to be stored in: " + secPropsFile);
 			String secPropsContents = "jdk.tls.disabledAlgorithms=SSLv3, RC4, DES, MD5withRSA, DH keySize < 1024, EC keySize < 224, anon, NULL, include jdk.disabled.namedCurves";
+			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(secPropsFile))); 
+			bw.write(secPropsContents); 
+			bw.flush();
+			bw.close();
+		}
+		
+		if ( tests.contains("api/javax_xml") ) {
+			// Requires SHA1 enabling
+			secPropsFile = resultDir + File.separator + "security.properties";
+			System.out.println("Custom security properties to be stored in: " + secPropsFile);
+			String secPropsContents = "jdk.xml.dsig.secureValidationPolicy=\\" + "\n";
+			secPropsContents += "disallowAlg http://www.w3.org/TR/1999/REC-xslt-19991116,\\" + "\n";
+			secPropsContents += "disallowAlg http://www.w3.org/TR/1999/REC-xslt-19991116,\\" + "\n";
+			secPropsContents += "disallowAlg http://www.w3.org/2001/04/xmldsig-more#rsa-md5,\\" + "\n";
+			secPropsContents += "disallowAlg http://www.w3.org/2001/04/xmldsig-more#hmac-md5,\\" + "\n";
+			secPropsContents += "disallowAlg http://www.w3.org/2001/04/xmldsig-more#md5,\\" + "\n";
+			secPropsContents += "disallowAlg http://www.w3.org/2007/05/xmldsig-more#sha1-rsa-MGF1,\\" + "\n";
+			secPropsContents += "disallowAlg http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha1,\\" + "\n";
+			secPropsContents += "maxTransforms 5,\\" + "\n";
+			secPropsContents += "maxReferences 30,\\" + "\n";
+			secPropsContents += "disallowReferenceUriSchemes file http https,\\" + "\n";
+			secPropsContents += "minKeySize RSA 1024,\\" + "\n";
+			secPropsContents += "minKeySize DSA 1024,\\" + "\n";
+			secPropsContents += "minKeySize EC 224,\\" + "\n";
+			secPropsContents += "noDuplicateIds,\\" + "\n";
+			secPropsContents += "noRetrievalMethodLoops";
 			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(secPropsFile))); 
 			bw.write(secPropsContents); 
 			bw.flush();
@@ -429,6 +466,10 @@ public class JavaTestRunner {
 			concurrency = Runtime.getRuntime().availableProcessors() + 1;
 			concurrencyString = String.valueOf(concurrency);
 		}
+		
+		if (platform.contains("zos")) {
+			extraJvmOptions += " -Dfile.encoding=US-ASCII";
+		}
 
 		// Set the operating system as 'Windows' for Windows and 'other' for all other operating systems.
 		// If 'other' is specified when executing on Windows, then Windows specific settings such
@@ -446,7 +487,12 @@ public class JavaTestRunner {
 			if (platform.contains("win")) {
 				libPath = "PATH";
 				robotAvailable = "Yes";
-			} else if (platform.contains("linux"))  {
+			} else if (platform.contains("alpine-linux")) {
+				libPath = "LD_LIBRARY_PATH";
+				robotAvailable = "No";
+				// Run only headless tests on Alpine Linux
+				keyword += "&!headful";
+			} else if (platform.contains("linux")) {
 				libPath = "LD_LIBRARY_PATH";
 				robotAvailable = "Yes";
 			} else if (platform.contains("aix")) {
@@ -458,6 +504,9 @@ public class JavaTestRunner {
 				robotAvailable = "No";
 			} else if (platform.contains("osx")) {
 				libPath = "DYLD_LIBRARY_PATH";
+				robotAvailable = "Yes";
+			} else if (platform.contains("solaris")) {
+				libPath = "LD_LIBRARY_PATH";
 				robotAvailable = "Yes";
 			} else {
 				System.out.println("Unknown platform:: " + platform);
@@ -482,9 +531,8 @@ public class JavaTestRunner {
 			}
 
 			if ( testsRequireDisplay(tests) ) {
-				if (platform.equals("zos")) {
+				if (platform.equals("zos") || platform.equals("alpine-linux")) {
 					fileContent += "set jck.env.testPlatform.headless Yes" + ";\n";
-					fileContent += "set jck.env.runtime.testExecute.otherEnvVars LIBPATH=/usr/lpp/tcpip/X11R66/lib" + ";\n";
 				}
 				else {
 					if ( !platform.equals("win") ) {
@@ -504,6 +552,10 @@ public class JavaTestRunner {
 
 			if ( tests.contains("api/java_awt") || tests.contains("api/javax_swing") || tests.equals("api") ) {
 				keyword += "&!robot";
+			}
+
+			if ( !platform.equals("win") && (tests.contains("api/signaturetest") || tests.contains("api/java_io")) ) {
+				fileContent += "set jck.env.testPlatform.xWindows \"No\"" + ";\n";
 			}
 
 			fileContent += "set jck.env.runtime.testExecute.cmdAsString \"" + pathToJava + "\"" + ";\n";
@@ -601,7 +653,9 @@ public class JavaTestRunner {
 
 			// The jplisLivePhase and Robot available settings are rejected if placed higher up in the .jtb file
 			if ( tests.contains("api/java_awt") || tests.contains("api/javax_swing") || tests.equals("api") ) {
-				fileContent += "set jck.env.runtime.awt.robotAvailable " + robotAvailable + ";\n";
+				if ( robotAvailable == "Yes" ) {
+					fileContent += "set jck.env.runtime.awt.robotAvailable " + robotAvailable + ";\n";
+				}
 			}
 			if ( tests.equals("api/java_lang") || tests.contains("api/java_lang/instrument") || tests.equals("api") ) {
 				fileContent += "set jck.env.runtime.jplis.jplisLivePhase Yes;\n";
@@ -640,8 +694,8 @@ public class JavaTestRunner {
 				// set the file and path separators (an error is thrown if they are set).
 				fileContent += "set jck.env.testPlatform.os \"Windows\";\n";
 				fileContent += "set jck.env.testPlatform.systemRoot " + System.getenv("WINDIR") + ";\n";
-			} else if (platform.equals("zos") || platform.equals("aix")) {
-				// On z/OS and AIX set the testplatform.os Current system
+			} else if (!jckVersion.contains("jck8") && (platform.equals("zos") || platform.equals("aix"))) {
+				// On jck11+ z/OS and AIX set the testplatform.os Current system
 				// due to JCK class OsHelper bug with getFileSep() in Compiler JCK Interviewer
 				fileContent += "set jck.env.testPlatform.os \"Current system\";\n";
 				cmdAsStringOrFile = "cmdAsFile";
@@ -673,8 +727,8 @@ public class JavaTestRunner {
 			
 			fileContent += "set jck.env.compiler.compRefExecute." + cmdAsStringOrFile + " \"" + pathToJava + "\"" + ";\n";
 
-			if (platform.equals("zos") || platform.equals("aix")) {
-				// On z/OS and AIX set the compRefExecute file and path separators
+			if (!jckVersion.contains("jck8") && (platform.equals("zos") || platform.equals("aix"))) {
+				// On jck11+ z/OS and AIX set the compRefExecute file and path separators
 				// due to JCK class OsHelper bug with getFileSep() in Compiler JCK Interviewer
 				fileContent += "set jck.env.compiler.compRefExecute.fileSep \"/\";\n";
 				fileContent += "set jck.env.compiler.compRefExecute.pathSep \":\";\n";
@@ -720,7 +774,7 @@ public class JavaTestRunner {
 				jxcCmd = jckBase + File.separator + "macos" + File.separator + "bin" + File.separator + "schemagen.sh";
 				genCmd = jckBase + File.separator + "macos" + File.separator + "bin" + File.separator + "wsgen.sh";
 				impCmd = jckBase + File.separator + "macos" + File.separator + "bin" + File.separator + "wsimport.sh";
-			} else if (platform.equals("zos")) {
+			} else if (platform.equals("zos") || platform.equals("solaris")) {
 				pathToJavac = testJdk + File.separator + "bin" + File.separator + "javac";
 				xjcCmd = jckBase + File.separator + "solaris" + File.separator + "bin" + File.separator + "xjc.sh";
 				jxcCmd = jckBase + File.separator + "solaris" + File.separator + "bin" + File.separator + "schemagen.sh";
@@ -731,14 +785,17 @@ public class JavaTestRunner {
 				return false; 
 			}
 			
+			// bash/ksh required to run schema scripts (cannot be standard sh)
 			if (platform.equals("linux")) {
-				// bash required to run schema scripts on linux (cannot be standard sh)
 				xjcCmd = "bash "+xjcCmd;
 				jxcCmd = "bash "+jxcCmd;
-            }
+			} else if (platform.equals("solaris")) {
+				xjcCmd = "ksh "+xjcCmd;
+				jxcCmd = "ksh "+jxcCmd;
+			}
 
 			fileContent += "concurrency " + concurrencyString + ";\n";
-			fileContent += "timeoutfactor 1" + ";\n";							// All Devtools tests take less than 1h to finish.
+			fileContent += "timeoutfactor 40" + ";\n";							// All Devtools tests take less than 1h to finish.
 
 			if (platform.equals("win")) {
 				// On Windows set the testplatform.os to Windows and set systemRoot, but do not
@@ -801,12 +858,14 @@ public class JavaTestRunner {
 				javatestAgentCmd.add(pathToJava);
 				javatestAgentCmd.add("-Djavatest.security.allowPropertiesAccess=true");
 				javatestAgentCmd.add("-Djava.security.policy=" + jckPolicyFileFullPath);
-				javatestAgentCmd.add(addModules);
-				javatestAgentCmd.add("-classpath");
+				if (!addModules.equals("")) {
+					javatestAgentCmd.add(addModules);
+				}
+				javatestAgentCmd.add("-classpath"); 
 				javatestAgentCmd.add(classPath);
 				javatestAgentCmd.add("com.sun.javatest.agent.AgentMain");
-				javatestAgentCmd.add(" -passive");
-				javatestAgent = startSubProcess("javatestAgent",javatestAgentCmd);
+				javatestAgentCmd.add("-passive");
+				javatestAgent = startSubProcess("com.sun.javatest.agent.AgentMain",javatestAgentCmd);
 
 				// We only need RMI registry and RMI activation daemon processes for tests under api/java_rmi
 				if (tests.contains("api/java_rmi") && 
@@ -836,7 +895,6 @@ public class JavaTestRunner {
 			}
 
 			long timeout = 24;
-			int chmodRC = -1;
 			int jckRC = -1;
 			boolean endedWithinTimeLimit = false;
 			
@@ -846,14 +904,8 @@ public class JavaTestRunner {
 				timeout = 4;
 			}
 
-			if (!platform.equals("win")) {
-				List<String> chmodCmd = new ArrayList<>();
-				chmodCmd.add("bash");
-				chmodCmd.add("-c"); 
-				chmodCmd.add("chmod 777 "+ javatestJarFullPath); 
-				Process chmod = startSubProcess("chmod", chmodCmd);
-				chmodRC = chmod.waitFor();
-			}
+			File f = new File (javatestJarFullPath); 
+			f.setReadable(true); 
 
 			List<String> jckCmd = new ArrayList<>();
 			jckCmd.add(pathToJava);
@@ -907,10 +959,7 @@ public class JavaTestRunner {
 			}
 			
 			boolean result;
-			if ( chmodRC != 0 && !platform.equals("win")) {
-				System.out.println("chmod command failed");
-				result = false;
-			} else if (jckRC != 0) {
+			if (jckRC != 0) {
 				System.out.println("JCK subprocess returned a non-zero value");
 				result = false; 
 			} else if (!endedWithinTimeLimit) {
@@ -971,6 +1020,11 @@ public class JavaTestRunner {
 			fw.close();
 			System.out.println(resultSummary.toString());
 			return true; 
+		} catch (FileNotFoundException e) {
+			System.out.println("No javatest XML result file found. Please check if the "
+					+ "test failed before generating the XML report");
+			e.printStackTrace(); 
+			return false; 
 		} catch (SAXParseException err) {
 			System.out.println ("Error processing XML JCK output report" + err.getMessage ());
 			err.printStackTrace();
@@ -1081,11 +1135,11 @@ public class JavaTestRunner {
 
 	private static boolean testsRequireDisplay (String tests) {
 		if (tests.equals("api") ||
-			tests.contains("api/java_applet") || tests.contains("api/java_io") ||
+			tests.contains("api/java_applet") || 
 			tests.contains("api/javax_swing") || tests.contains("api/javax_sound") ||
 			tests.contains("api/java_awt")  || tests.contains("api/javax_print") ||
 			tests.contains("api/java_beans") || tests.contains("api/javax_accessibility") ||
-			tests.contains("api/javax_naming") || tests.contains("api/signaturetest")) {
+			tests.contains("api/javax_naming")) {
 			return true;
 		}
 		return false;
@@ -1094,7 +1148,7 @@ public class JavaTestRunner {
 	private static String getTestSpecificJvmOptions(String jckVersion, String tests) {
 		String testSpecificJvmOptions = "";
 		
-		if ( tests.contains("api/javax_net") ) {
+		if ( tests.contains("api/javax_net") || tests.contains("api/javax_xml")) {
 			// Needs extra security.properties
 			testSpecificJvmOptions += " -Djava.security.properties=" + secPropsFile;
 		}
@@ -1181,6 +1235,14 @@ public class JavaTestRunner {
 		// set the shortname to the osName if the current system is Linux
 		// or AIX this is all that is needed
 		String osShortName = osName;
+
+		// We need to determine if the platform is Alpine Linux or not
+		if (osName.equals("linux")) {
+			Path alpine = Paths.get("/etc/alpine-release");
+			if (Files.exists(alpine)) {
+				osShortName = "alpine-linux";
+			}
+		}
 
 		// if we are on z/OS remove the slash
 		if (osName.equals("z/os")) {

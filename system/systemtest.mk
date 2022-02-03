@@ -47,8 +47,8 @@ ifeq (,$(findstring $(JDK_IMPL),hotspot))
 endif
 
 define SYSTEMTEST_CMD_TEMPLATE
-perl $(SYSTEMTEST_RESROOT)$(D)stf$(D)stf.core$(D)scripts$(D)stf.pl \
-	-test-root=$(Q)$(SYSTEMTEST_RESROOT)$(D)stf;$(SYSTEMTEST_RESROOT)$(D)aqa-systemtest$(OPENJ9_PRAM)$(Q) \
+perl $(SYSTEMTEST_RESROOT)$(D)STF$(D)stf.core$(D)scripts$(D)stf.pl \
+	-test-root=$(Q)$(SYSTEMTEST_RESROOT)$(D)STF;$(SYSTEMTEST_RESROOT)$(D)aqa-systemtest$(OPENJ9_PRAM)$(Q) \
 	-systemtest-prereqs=$(Q)$(SYSTEMTEST_RESROOT)$(D)systemtest_prereqs$(Q) \
 	-java-args=$(SQ)$(JVM_OPTIONS)$(SQ) \
 	-results-root=$(REPORTDIR)
@@ -57,7 +57,7 @@ endef
 # Default test to be run for system_custom in regular system test builds 
 CUSTOM_TARGET ?= -test=ClassloadingLoadTest
 
-ADD_OPENS_CMD=""
+ADD_OPENS_CMD=
 ifneq ($(JDK_VERSION),8)
-	ADD_OPENS_CMD=$(Q)--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED$(Q)
+	ADD_OPENS_CMD=--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED
 endif

@@ -92,16 +92,13 @@ JTREG_BASIC_OPTIONS += $(JTREG_XML_OPTION)
 JTREG_BASIC_OPTIONS += $(EXTRA_JTREG_OPTIONS)
 JTREG_KEY_OPTIONS :=
 VMOPTION_HEADLESS :=
-ifneq ($(PLATFORM),x86-64_alpine-linux) 
+libcVendor = $(shell ldd --version 2>&1 | sed -n '1s/.*\(musl\).*/\1/p')
+
+ifeq ($(libcVendor),musl)
 	JTREG_KEY_OPTIONS := -k:'!headful'
 	VMOPTION_HEADLESS := -Djava.awt.headless=true
 endif
 JTREG_BASIC_OPTIONS += $(JTREG_KEY_OPTIONS)
-
-ifndef JRE_IMAGE
-	JRE_ROOT := $(TEST_JDK_HOME)
-	JRE_IMAGE := $(subst j2sdk-image,j2re-image,$(JRE_ROOT))
-endif
 
 ifdef OPENJDK_DIR 
 # removing "

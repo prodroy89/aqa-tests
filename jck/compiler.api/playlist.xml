@@ -16,6 +16,16 @@
 	<include>../jck.mk</include>
 	<test>
 		<testCaseName>jck-compiler-api-java_rmi</testCaseName>
+		<disables>
+			<disable>
+				<comment>Disabled on all platforms and Java levels due to backlog/issues/559. To be run manually by CR team</comment>
+				<impl>ibm</impl>
+			</disable>
+			<disable>
+				<comment>Disabled on all platforms and Java levels due to backlog/issues/559. To be run manually by CR team</comment>
+				<impl>openj9</impl>
+			</disable>
+		</disables>
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>
@@ -67,6 +77,14 @@
 	</test>
 	<test>
 		<testCaseName>jck-compiler-api-javax_tools</testCaseName>
+		<disables>
+			<disable>
+				<comment>Temporarily disabled on z/OS for backlog/issues/669</comment>
+				<platform>.*zos.*</platform>
+				<impl>ibm</impl>
+				<version>11</version>
+			</disable>
+		</disables>
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>

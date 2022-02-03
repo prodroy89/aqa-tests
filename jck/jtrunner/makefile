@@ -26,6 +26,7 @@
 # Figure out current platform
 ###
 OS:=$(shell uname -s | tr "[:upper:]" "[:lower:]")
+ARCH:=$(shell uname -m | tr "[:upper:]" "[:lower:]")
 
 ifneq (,$(findstring cygwin,$(OS)))
 	OS:=win
@@ -33,6 +34,11 @@ endif
 
 ifneq (,$(findstring darwin,$(OS)))
 	OS:=osx
+	# Detect a M1 processor. Needed because uname -m doesn't work when the shell runs in x86_64 emulation
+	ARCH:=$(shell sysctl -n machdep.cpu.brand_string)
+	ifeq ($(ARCH),Apple M1)
+		ARCH:=arm64
+	endif
 endif
 
 ifeq ($(OS),os/390)
@@ -44,6 +50,7 @@ ifneq (,$(findstring win,$(OS)))
 endif
 
 $(info OS is $(OS))
+$(info ARCH is $(ARCH))
 
 ifeq ($(OS),win)
 	DESTDIR=$(OUTDIR)\$(OS)
@@ -93,7 +100,7 @@ endif
 # Following defaults set for Unix environment. For Windows platform following variables are overriden
 LIBPREF=lib
 ifneq (,$(findstring aix,$(OS)))
-	LIBEXT=a
+	LIBEXT=so
 else
 ifneq (,$(findstring osx,$(OS)))
 	LIBEXT=dylib
@@ -145,12 +152,22 @@ LDFLAGS=-shared
 
 ifeq ($(OS),osx)
 	CC=gcc
-	CFLAGS=-fPIC -I$(OSX_PATH) -I$(SRC_PATH)
+	ifeq ($(ARCH),arm64)
+		CFLAGS=-arch arm64 -fPIC -I$(OSX_PATH) -I$(SRC_PATH)
+	else
+		CFLAGS=-fPIC -I$(OSX_PATH) -I$(SRC_PATH)
+	endif
+	LDFLAGS=-shared
+endif
+
+ifeq ($(OS),sunos)
+	CC=cc
+	CFLAGS=-fPIC -m64 -I$(SOLARIS_PATH) -I$(SRC_PATH)
 	LDFLAGS=-shared
 endif
 
 ifeq ($(OS),aix)
-	CC=/opt/IBM/xlC/13.1.3/bin/xlc
+	CC=/opt/IBM/xlC/16.1.0/bin/xlc
 	CFLAGS=-qstaticinline -q$(BitMode) -I$(UNIX_PATH) -I$(OSX_PATH) -I$(SRC_PATH)
 	LDFLAGS=-G -q$(BitMode)
 endif
@@ -193,8 +210,9 @@ ifeq ($(OS),win)
     endif
 
 	IFLAGS=/I. /I"$(JAVA_HOME)/../include" /I"$(SRCDIR)$(D)src$(D)share$(D)lib$(D)jni$(D)include$(D)win32" /I"$(SRCDIR)$(D)src$(D)share$(D)lib$(D)jni$(D)include$(D)windows" /I"$(SRCDIR)" /I"$(SRCDIR)$(D)src" /I"$(SRCDIR)$(D)src$(D)share$(D)lib$(D)jni$(D)include" /I"$(SRCDIR)$(D)src$(D)share$(D)lib$(D)jvmti$(D)include"
-	CFLAGS=/DWIN32 /D_WINDOWS /LD /MD $(IFLAGS)
+	CFLAGS=/DWIN32 /D_AMD64_ /D_WINDOWS /LD /MD $(IFLAGS)
 	LFLAGS=/NOLOGO /DLL /INCREMENTAL:NO /NODEFAULTLIB:LIBCMTD /OUT:
+	LDFLAGS=
 	LINK_CMD=$(CMD_PREFIX) link
 	CC=cl
 	LIBPREF=
@@ -244,7 +262,18 @@ help:
 
 build:createdir $(OBJS) installjmx
 
-$(LIBPREF)jckjni.$(LIBEXT): jckjni.c 
+# We need the extra include for 16+
+ifeq ($(OS),win)
+ifeq ($(shell test $(JDK_VERSION) -gt 15; echo $$?),0)
+EXTRAJCKJNIDEP=$(SRCDIR)\src\share\lib\jni\include\windows\jckjni_md.h-DIST
+
+$(EXTRAJCKJNIDEP):
+	cp "$(SRCDIR)\src\share\lib\jni\include\windows\jckjni_md.h" "$(EXTRAJCKJNIDEP)"
+	perl -p -i -e 'print "#if (defined(WIN32) || defined(_WIN32))\n#include <synchapi.h>\n#endif\n\n" if $$_ =~ /^#endif.*JCKJNI_MD_H/' "$(SRCDIR)\src\share\lib\jni\include\windows\jckjni_md.h"
+
+endif
+endif
+$(LIBPREF)jckjni.$(LIBEXT): jckjni.c $(EXTRAJCKJNIDEP)
 	cd $(FULLOUTDIR) && $(CC) $(CFLAGS) $(LDFLAGS) $< $(OFLAG)$(FULLOUTDIR)$(VAR)
 	$(JCKJNI)
 

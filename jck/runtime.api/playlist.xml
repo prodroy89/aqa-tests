@@ -289,18 +289,6 @@
 	</test>
 	<test>
 		<testCaseName>jck-runtime-api-signaturetest</testCaseName>
-		<disables>
-			<disable>
-				<comment>Disabled on osx for infrastructure/issues/5254. Awaiting some automation improvements, in the interim these targets will be run manually</comment>
-				<platform>x86-64_mac</platform>
-				<impl>ibm</impl>
-			</disable>
-			<disable>
-				<comment>Disabled on osx for infrastructure/issues/5254. Awaiting some automation improvements, in the interim these targets will be run manually</comment>
-				<platform>x86-64_mac</platform>
-				<impl>openj9</impl>
-			</disable>
-		</disables>
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>
@@ -332,6 +320,14 @@
 	</test>
 	<test>
 		<testCaseName>jck-runtime-api-java_util-regex</testCaseName>
+		<disables>
+			<disable>
+				<comment>Temporarily disabled on z/OS for backlog/issues/669</comment>
+				<platform>.*zos.*</platform>
+				<impl>ibm</impl>
+				<version>11</version>
+			</disable>
+		</disables>
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>
@@ -359,7 +355,7 @@
 			</disable>
  			<disable>
 				<comment>Requires UI https://github.com/temurin-compliance/temurin-compliance/issues/29</comment>
-				<platform>x86-64_mac</platform>
+				<platform>x86-64_mac|aarch64_mac</platform>
   				<impl>hotspot</impl>
 			</disable>
 		</disables>
@@ -404,7 +400,7 @@
 			</disable>
   			<disable>
 				<comment>Requires UI https://github.com/temurin-compliance/temurin-compliance/issues/29</comment>
-				<platform>x86-64_mac</platform>
+				<platform>x86-64_mac|aarch64_mac</platform>
 				<impl>hotspot</impl>
  			</disable>
 		</disables>
@@ -433,7 +429,7 @@
 			</disable>
 			<disable>
 				<comment>Requires UI https://github.com/temurin-compliance/temurin-compliance/issues/29</comment>
-				<platform>x86-64_mac</platform>
+				<platform>x86-64_mac|aarch64_mac</platform>
 				<impl>hotspot</impl>
 			</disable>
 			<disable>
@@ -500,7 +496,7 @@
 			</disable>
  			<disable>
 				<comment>Requires UI https://github.com/temurin-compliance/temurin-compliance/issues/29</comment>
-				<platform>x86-64_mac</platform>
+				<platform>x86-64_mac|aarch64_mac</platform>
 				<impl>hotspot</impl>
 			</disable>
 		</disables>
@@ -518,18 +514,6 @@
 	</test>
 	<test>
 		<testCaseName>jck-runtime-api-java_io</testCaseName>
-		<disables>
-			<disable>
-				<comment>Disabled on osx for infrastructure/issues/5254. Awaiting some automation improvements, in the interim these targets will be run manually</comment>
-				<platform>x86-64_mac</platform>
-				<impl>ibm</impl>
-			</disable>
-			<disable>
-				<comment>Disabled on osx for infrastructure/issues/5254. Awaiting some automation improvements, in the interim these targets will be run manually</comment>
-				<platform>x86-64_mac</platform>
-				<impl>openj9</impl>
-			</disable>
-		</disables>
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>
@@ -603,12 +587,11 @@
 			<version>8</version>
 			<impl>openj9</impl>
 			</disable>
-
 		</disables>
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>
-		<command>$(JCK_CMD_TEMPLATE) tests=api/java_net jckRoot=$(JCK_ROOT) jckversion=$(JCK_VERSION) testsuite=RUNTIME concurrency=1; \
+		<command>$(JCK_CMD_TEMPLATE) tests=api/java_net jckRoot=$(JCK_ROOT) jckversion=$(JCK_VERSION) testsuite=RUNTIME concurrency=1 configAltPath=$(CONFIG_ALT_PATH); \
 	$(TEST_STATUS)</command>
 		<levels>
 			<level>special</level>
@@ -622,7 +605,7 @@
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>
-		<command>$(JCK_CMD_TEMPLATE) tests=api/java_nio jckRoot=$(JCK_ROOT) jckversion=$(JCK_VERSION) testsuite=RUNTIME; \
+		<command>$(JCK_CMD_TEMPLATE) tests=api/java_nio jckRoot=$(JCK_ROOT) jckversion=$(JCK_VERSION) testsuite=RUNTIME configAltPath=$(CONFIG_ALT_PATH); \
 	$(TEST_STATUS)</command>
 		<levels>
 			<level>special</level>
@@ -650,26 +633,38 @@
 		<disables>
 			<disable>
 				<comment>Disabled on win for backlog/issues/488. Awaiting some automation improvements, in the interim these targets will be run manually</comment>
-				<platform>x86-64_windows</platform>
+				<platform>x86-64_windows|x86-32_windows</platform>
 				<version>11</version>
 				<impl>ibm</impl>
 			</disable>
 			<disable>
 				<comment>Disabled on win for backlog/issues/488. Awaiting some automation improvements, in the interim these targets will be run manually</comment>
-				<platform>x86-64_windows</platform>
+				<platform>x86-64_windows|x86-32_windows</platform>
 				<version>8</version>
 				<impl>ibm</impl>
 			</disable>
 			<disable>
 				<comment>Disabled on win for backlog/issues/488. Awaiting some automation improvements, in the interim these targets will be run manually</comment>
-				<platform>x86-64_windows</platform>
+				<platform>x86-64_windows|x86-32_windows</platform>
+				<version>17</version>
+				<impl>ibm</impl>
+			</disable>
+			<disable>
+				<comment>Disabled on win for backlog/issues/488. Awaiting some automation improvements, in the interim these targets will be run manually</comment>
+				<platform>x86-64_windows|x86-32_windows</platform>
 				<version>11</version>
 				<impl>openj9</impl>
 			</disable>
 			<disable>
 				<comment>Disabled on win for backlog/issues/488. Awaiting some automation improvements, in the interim these targets will be run manually</comment>
-				<platform>x86-64_windows</platform>
+				<platform>x86-64_windows|x86-32_windows</platform>
 				<version>8</version>
+				<impl>openj9</impl>
+			</disable>
+			<disable>
+				<comment>Disabled on win for backlog/issues/488. Awaiting some automation improvements, in the interim these targets will be run manually</comment>
+				<platform>x86-64_windows|x86-32_windows</platform>
+				<version>17</version>
 				<impl>openj9</impl>
 			</disable>
 		</disables>
@@ -770,7 +765,7 @@
 			</disable>
 			<disable>
 				<comment>Requires UI https://github.com/temurin-compliance/temurin-compliance/issues/29</comment>
-				<platform>x86-64_mac</platform>
+				<platform>x86-64_mac|aarch64_mac</platform>
 				<impl>hotspot</impl>
 			</disable>
 		</disables>
@@ -917,7 +912,7 @@
 			</disable>
 			<disable>
 				<comment>Requires UI https://github.com/temurin-compliance/temurin-compliance/issues/29</comment>
-				<platform>x86-64_mac</platform>
+				<platform>x86-64_mac|aarch64_mac</platform>
 				<impl>hotspot</impl>
   			</disable>
 		</disables>
@@ -976,8 +971,18 @@
 			</disable>
 			<disable>
 				<comment>Requires UI https://github.com/temurin-compliance/temurin-compliance/issues/29</comment>
-				<platform>x86-64_mac</platform>
+				<platform>x86-64_mac|aarch64_mac</platform>
 				<impl>hotspot</impl>
+			</disable>
+			<disable>
+				<comment>Disabled on all platforms on 17 for backlog/issues/633 (intermittent machine issue). To be run manually</comment>
+				<version>17+</version>
+				<impl>openj9</impl>
+			</disable>
+			<disable>
+				<comment>Disabled on all platforms on 17 for backlog/issues/633 (intermittent machine issue). To be run manually</comment>
+				<version>17+</version>
+				<impl>ibm</impl>
 			</disable>
 		</disables>
 		<variations>
@@ -1025,7 +1030,7 @@
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>
-		<command>$(JCK_CMD_TEMPLATE) tests=api/javax_security jckRoot=$(JCK_ROOT) jckversion=$(JCK_VERSION) testsuite=RUNTIME; \
+		<command>$(JCK_CMD_TEMPLATE) tests=api/javax_security jckRoot=$(JCK_ROOT) jckversion=$(JCK_VERSION) testsuite=RUNTIME configAltPath=$(CONFIG_ALT_PATH); \
 	$(TEST_STATUS)</command>
 		<levels>
 			<level>special</level>
@@ -1049,7 +1054,7 @@
 			</disable>
  			<disable>
 				<comment>Requires UI https://github.com/temurin-compliance/temurin-compliance/issues/29</comment>
-				<platform>x86-64_mac</platform>
+				<platform>x86-64_mac|aarch64_mac</platform>
 				<impl>hotspot</impl>
 			</disable>
 		</disables>
@@ -1092,7 +1097,7 @@
 			</disable>
 			<disable>
 				<comment>Requires UI https://github.com/temurin-compliance/temurin-compliance/issues/29</comment>
-				<platform>x86-64_mac</platform>
+				<platform>x86-64_mac|aarch64_mac</platform>
 				<impl>hotspot</impl>
 			</disable>
 			<disable>
@@ -1120,6 +1125,14 @@
 	</test>
 	<test>
 		<testCaseName>jck-runtime-api-javax_tools</testCaseName>
+		<disables>
+			<disable>
+				<comment>Temporarily disabled on z/OS for backlog/issues/669</comment>
+				<platform>.*zos.*</platform>
+				<impl>ibm</impl>
+				<version>11</version>
+			</disable>
+		</disables>
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>
@@ -1172,10 +1185,6 @@
 				<comment>backlog/issues/600</comment>
 				<impl>ibm</impl>
 			</disable>
-			<disable>
-				<comment>backlog/issues/600</comment>
-				<impl>hotspot</impl>
-			</disable>
 		</disables>
 	</test>
 	<test>
@@ -1183,7 +1192,7 @@
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>
-		<command>$(JCK_CMD_TEMPLATE) tests=api/org_ietf jckRoot=$(JCK_ROOT) jckversion=$(JCK_VERSION) testsuite=RUNTIME; \
+		<command>$(JCK_CMD_TEMPLATE) tests=api/org_ietf jckRoot=$(JCK_ROOT) jckversion=$(JCK_VERSION) testsuite=RUNTIME configAltPath=$(CONFIG_ALT_PATH); \
 	$(TEST_STATUS)</command>
 		<levels>
 			<level>special</level>

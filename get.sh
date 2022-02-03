@@ -367,7 +367,7 @@ getBinaryOpenjdk()
 					cd ./tmp
 					pax -p xam -rzf ../$jar_name
 				else
-					gzip -cd $jar_name | (cd tmp && tar xof -)
+					gunzip -cd $jar_name | (cd tmp && /usr/bin xof -)
 				fi
 
 				cd $SDKDIR/openjdkbinary/tmp

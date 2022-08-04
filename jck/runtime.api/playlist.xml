@@ -405,14 +405,6 @@
 		<testCaseName>jck-runtime-api-java_awt</testCaseName>
 		<disables>
 			<disable>
-				<comment>backlog/issues/608 : To be run manually</comment>
-				<impl>ibm</impl>
-			</disable>
-			<disable>
-				<comment>backlog/issues/608 : To be run manually</comment>
-				<impl>openj9</impl>
-			</disable>
-			<disable>
 				<comment>Requires UI https://github.com/temurin-compliance/temurin-compliance/issues/29</comment>
 				<platform>x86-64_mac|aarch64_mac</platform>
 				<impl>hotspot</impl>
@@ -990,15 +982,6 @@
 	</test>
 	<test>
 		<testCaseName>jck-runtime-api-javax_swing</testCaseName>
-		<disables>
-			<disable>
-				<comment>backlog/issues/608 : To be run manually</comment>
-				<impl>ibm</impl>
-			</disable>
-			<disable>
-				<comment>backlog/issues/608 : To be run manually</comment>
-				<impl>openj9</impl>
-			</disable>
 			<disable>
 				<comment>Requires UI https://github.com/temurin-compliance/temurin-compliance/issues/29</comment>
 				<platform>x86-64_mac</platform>

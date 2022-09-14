@@ -434,20 +434,6 @@
 	</test>
 	<test>
 		<testCaseName>jck-runtime-api-java_beans</testCaseName>
-		<disables>
-			<disable>
-				<comment>Disabled on aix for backlog/issues/486. Awaiting some automation improvements, in the interim these targets will be run manually</comment>
-				<platform>ppc64_aix</platform>
-				<version>11</version>
-				<impl>ibm</impl>
-			</disable>
-			<disable>
-				<comment>Disabled on aix for backlog/issues/486. Awaiting some automation improvements, in the interim these targets will be run manually</comment>
-				<platform>ppc64_aix</platform>
-				<version>11</version>
-				<impl>openj9</impl>
-			</disable>
-		</disables>
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>

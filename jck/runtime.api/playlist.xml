@@ -405,31 +405,6 @@
 	</test>
 	<test>
 		<testCaseName>jck-runtime-api-java_awt</testCaseName>
-		<disables>
-			<disable>
-				<comment>Disabled on osx for infrastructure/issues/5254, and on rest for backlog/issues/485. Awaiting some automation improvements, in the interim these targets will be run manually</comment>
-				<impl>ibm</impl>
-			</disable>
-			<disable>
-				<comment>Disabled on osx for infrastructure/issues/5254, and on rest for backlog/issues/485. Awaiting some automation improvements, in the interim these targets will be run manually</comment>
-				<impl>openj9</impl>
-			</disable>
-			<disable>
-				<comment>Requires UI https://github.com/temurin-compliance/temurin-compliance/issues/29</comment>
-				<platform>x86-64_mac</platform>
-				<impl>hotspot</impl>
-			</disable>
-			<disable>
-				<comment>Requires UI https://github.com/temurin-compliance/temurin-compliance/issues/29</comment>
-				<platform>x86-32_windows</platform>
-				<impl>hotspot</impl>
- 			</disable>
- 			<disable>
-				<comment>Requires UI https://github.com/temurin-compliance/temurin-compliance/issues/29</comment>
-				<platform>x86-64_windows</platform>
-				<impl>hotspot</impl>
- 			</disable>
-		</disables>
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>

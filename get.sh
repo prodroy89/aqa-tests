@@ -357,11 +357,11 @@ getBinaryOpenjdk()
 				if [[ $file_name == *zip ]] || [[ $file_name == *jar ]]; then
 					unzip -q $file_name -d $extract_dir
 				else
-					# some debug-image tar has parent folder ... strip it
-					if tar --version 2>&1 | grep GNU 2>&1; then
-						gzip -cd $file_name | tar xof - -C $extract_dir --strip 1
+					# some debug-image tar has parent folder ... strip it /usr/bin/tar added for MAC_java80 runs
+					if /usr/bin/tar --version 2>&1 | grep GNU 2>&1; then
+						gzip -cd $jar_name | /usr/bin/tar xof - -C $extract_dir --strip 1
 					else
-						mkdir dir.$$ && cd dir.$$ && gzip -cd ../$file_name | tar xof - && cd * && tar cf - . | (cd ../../$extract_dir && tar xpf -) && cd ../.. && rm -rf dir.$$
+						mkdir dir.$$ && cd dir.$$ && gzip -cd ../$jar_name | /usr/bin/tar xof - && cd * && /usr/bin/tar cf - . | (cd ../../$extract_dir && /usr/bin/tar xpf -) && cd ../.. && rm -rf dir.$$
 					fi
 				fi
 			else

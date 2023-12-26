@@ -377,10 +377,10 @@ getBinaryOpenjdk()
 					cd ./tmp
 					pax -p xam -rzf ../$jar_name
 				else
-					gzip -cd $jar_name | (cd $SDKDIR/openjdkbinary/tmp && /usr/bin/tar xof -)
+					gzip -cd $jar_name | (cd $SDKDIR/jdkbinary/tmp && /usr/bin/tar xof -)
 				fi
 
-				cd $SDKDIR/openjdkbinary/tmp
+				cd $SDKDIR/jdkbinary/tmp
 				jar_dirs=`ls -d */`
 				jar_dir_array=(${jar_dirs//\\n/ })
 				len=${#jar_dir_array[@]}

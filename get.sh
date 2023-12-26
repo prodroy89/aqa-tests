@@ -354,8 +354,8 @@ getBinaryOpenjdk()
 					extract_dir="./j2sdk-image/jre"
 				fi
 				echo "Uncompressing $file_name over $extract_dir..."
-				if [[ $file_name == *zip ]] || [[ $file_name == *jar ]]; then
-					unzip -q $file_name -d $extract_dir
+				if [[ $jar_name == *zip ]] || [[ $jar_name == *jar ]]; then
+					unzip -q $jar_name -d $extract_dir
 				else
 					# some debug-image tar has parent folder ... strip it /usr/bin/tar added for MAC_java80 runs
 					if /usr/bin/tar --version 2>&1 | grep GNU 2>&1; then
@@ -375,12 +375,12 @@ getBinaryOpenjdk()
 					unzip -q $file_name -d ./tmp
 				elif [[ $file_name == *.pax* ]]; then
 					cd ./tmp
-					pax -p xam -rzf ../$file_name
+					pax -p xam -rzf ../$jar_name
 				else
-					gzip -cd $file_name | (cd tmp && tar xof -)
+					gzip -cd $jar_name | (cd $SDKDIR/openjdkbinary/tmp && /usr/bin/tar xof -)
 				fi
 
-				cd $SDKDIR/jdkbinary/tmp
+				cd $SDKDIR/openjdkbinary/tmp
 				jar_dirs=`ls -d */`
 				jar_dir_array=(${jar_dirs//\\n/ })
 				len=${#jar_dir_array[@]}

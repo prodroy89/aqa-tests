@@ -343,17 +343,17 @@ getBinaryOpenjdk()
 		fi
 	done
 
-	for file_name in "${jdk_file_array[@]}"
+	for jar_name in "${jdk_file_array[@]}"
 	do
-		if [[ ! "$file_name" =~ "sbom" ]]; then
-			if [[ "$file_name" =~ "debug-image" ]] || [[ "$file_name" =~ "debugimage" ]]; then
+		if [[ ! "$jar_name" =~ "sbom" ]]; then
+			if [[ "$jar_name" =~ "debug-image" ]] || [[ "$jar_name" =~ "debugimage" ]]; then
 				# if file_name contains debug-image, extract into j2sdk-image/jre or j2sdk-image dir
 				# Otherwise, files will be extracted under ./tmp
 				extract_dir="./j2sdk-image"
 				if [ -d "$SDKDIR/jdkbinary/j2sdk-image/jre" ]; then
 					extract_dir="./j2sdk-image/jre"
 				fi
-				echo "Uncompressing $file_name over $extract_dir..."
+				echo "Uncompressing $jar_name over $extract_dir..."
 				if [[ $jar_name == *zip ]] || [[ $jar_name == *jar ]]; then
 					unzip -q $jar_name -d $extract_dir
 				else
@@ -370,10 +370,10 @@ getBinaryOpenjdk()
 				else
 					mkdir $SDKDIR/jdkbinary/tmp
 				fi
-				echo "Uncompressing file: $file_name ..."
-				if [[ $file_name == *zip ]] || [[ $file_name == *jar ]]; then
-					unzip -q $file_name -d ./tmp
-				elif [[ $file_name == *.pax* ]]; then
+				echo "Uncompressing file: $jar_name ..."
+				if [[ $jar_name == *zip ]] || [[ $jar_name == *jar ]]; then
+					unzip -q $jar_name -d ./tmp
+				elif [[ $jar_name == *.pax* ]]; then
 					cd ./tmp
 					pax -p xam -rzf ../$jar_name
 				else

@@ -598,7 +598,7 @@ public class JavatestUtil {
 				fileContent += "set jck.env.runtime.jgss.kdcHostName " + KerberosConfig.kdcHostName + ";\n";
 				fileContent += "set jck.env.runtime.jgss.kdcRealmName " + KerberosConfig.kdcRealmName + ";\n";
 
-				extraJvmOptions += " -Djava.security.krb5.conf=" + krbConfFile + " -DKRB5CCNAME=" + workDir + File.separator + "krb5.cache" + " -DKRB5_KTNAME=" + workDir + File.separator + "krb5.keytab";
+				extraJvmOptions += " -Djava.security.krb5.conf=" + krbConfFile + " -DKRB5CCNAME="/Users/jenkins/workspace/Grinder_CR/aqa-tests/jck/jtrunner/config/default/krb5.cache" + " -DKRB5_KTNAME="/Users/jenkins/workspace/Grinder_CR/aqa-tests/jck/jtrunner/config/default/krb5.cache/krb5.keytab";
 			}	
 			if ( tests.contains("api/java_net") || tests.contains("api/java_nio") || tests.equals("api") ) {
 				fileContent += "set jck.env.runtime.net.localHostName " + hostname + ";\n";

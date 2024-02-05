@@ -16,9 +16,10 @@ NPROCS:=1
 MEMORY_SIZE:=1024
 
 OS:=$(shell uname -s)
+ARCH:=$(shell uname -m)
 
 ifeq ($(OS),Linux)
-	NPROCS:=$(shell grep -c ^processor /proc/cpuinfo)
+	NPROCS:=$(shell nproc)
 	MEMORY_SIZE:=$(shell KMEMMB=`awk '/^MemTotal:/{print int($$2/1024)}' /proc/meminfo`; if [ -r /sys/fs/cgroup/memory/memory.limit_in_bytes ]; then CGMEM=`cat /sys/fs/cgroup/memory/memory.limit_in_bytes`; else CGMEM=`expr $${KMEMMB} \* 1024`; fi; CGMEMMB=`expr $${CGMEM} / 1024`; if [ "$${KMEMMB}" -lt "$${CGMEMMB}" ]; then echo "$${KMEMMB}"; else echo "$${CGMEMMB}"; fi)
 endif
 ifeq ($(OS),Darwin)
@@ -78,11 +79,16 @@ JTREG_BASIC_OPTIONS += -retain:fail,error,*.dmp,javacore.*,heapdump.*,*.trc
 # Ignore tests are not run and completely silent about it
 JTREG_IGNORE_OPTION = -ignore:quiet
 JTREG_BASIC_OPTIONS += $(JTREG_IGNORE_OPTION)
+# riscv64 machines aren't very fast (yet!!)
+ifeq ($(ARCH), riscv64)
+	JTREG_TIMEOUT_OPTION = -timeoutFactor:16
+else
 # Multiple by 8 the timeout numbers, except on zOS use 2
 ifneq ($(OS),OS/390)
 	JTREG_TIMEOUT_OPTION =  -timeoutFactor:8
 else
 	JTREG_TIMEOUT_OPTION =  -timeoutFactor:2
+endif
 endif
 JTREG_BASIC_OPTIONS += $(JTREG_TIMEOUT_OPTION)
 # Create junit xml
@@ -94,6 +100,11 @@ VMOPTION_HEADLESS :=
 libcVendor = $(shell ldd --version 2>&1 | sed -n '1s/.*\(musl\).*/\1/p')
 
 ifeq ($(libcVendor),musl)
+	JTREG_KEY_OPTIONS := -k:'!headful'
+	VMOPTION_HEADLESS := -Djava.awt.headless=true
+endif
+# RISC-V is built in headless mode for now. See https://github.com/adoptium/ci-jenkins-pipelines/pull/867
+ifeq ($(ARCH),riscv64)
 	JTREG_KEY_OPTIONS := -k:'!headful'
 	VMOPTION_HEADLESS := -Djava.awt.headless=true
 endif
@@ -195,7 +206,7 @@ endif
 FEATURE_PROBLEM_LIST_FILE:=
 ifneq (,$(findstring FIPS140_2, $(TEST_FLAG))) 
 	FEATURE_PROBLEM_LIST_FILE:=-exclude:$(Q)$(JTREG_JDK_TEST_DIR)$(D)ProblemList-FIPS140_2.txt$(Q)
-else ifneq (,$(findstring FIPS140_3_OpenJcePlus, $(TEST_FLAG)))
+else ifneq (,$(findstring FIPS140_3_OpenJCEPlus, $(TEST_FLAG)))
 	FEATURE_PROBLEM_LIST_FILE:=-exclude:$(Q)$(JTREG_JDK_TEST_DIR)$(D)ProblemList-FIPS140_3_OpenJcePlus.txt$(Q)
 endif
 

@@ -14,7 +14,7 @@
 #
 
 # Supported versions
-supported_versions="8 11 17"
+supported_versions="8 11 17 21 22"
 
 # Supported JVMs
 supported_jvms="hotspot openj9"
@@ -30,7 +30,7 @@ supported_packages="jdk jre"
 supported_builds="full"
 
 # Supported tests
-supported_tests="external_custom camel criu-portable-checkpoint criu-portable-restore criu-ubi-portable-checkpoint criu-ubi-portable-restore derby elasticsearch jacoco jenkins functional-test kafka lucene-solr openliberty-mp-tck payara-mp-tck quarkus quarkus_quickstarts scala system-test tomcat tomee wildfly wycheproof netty spring zookeeper"
+supported_tests="external_custom camel criu-functional criu-portable-checkpoint criu-portable-restore criu-ubi-portable-checkpoint criu-ubi-portable-restore derby elasticsearch jacoco jenkins functional-test kafka lucene-solr openliberty-mp-tck payara-mp-tck quarkus quarkus_quickstarts scala system-test tomcat tomee wildfly wycheproof netty spring zookeeper"
 
 function check_version() {
     version=$1

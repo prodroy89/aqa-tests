@@ -46,6 +46,8 @@ compiler/8209951/TestCipherBlockChainingEncrypt.java https://github.com/adoptium
 gc/g1/TestHumongousCodeCacheRoots.java https://github.com/adoptium/aqa-tests/issues/2818 aix-all,linux-arm
 gc/whitebox/TestConcMarkCycleWB.java https://bugs.openjdk.java.net/browse/JDK-8067368 linux-arm
 gc/metaspace/TestMetaspaceMemoryPool.java https://github.com/adoptium/aqa-tests/issues/2708 generic-all
+gc/ergonomics/TestDynamicNumberOfGCThreads.java https://github.com/adoptium/aqa-tests/issues/5019 linux-arm
+gc/class_unloading/TestG1ClassUnloadingHWM.java https://github.com/adoptium/aqa-tests/issues/5019 linux-arm
 gc/TestMemoryMXBeansAndPoolsPresence.java https://github.com/adoptium/aqa-tests/issues/3297 linux-arm
 gc/g1/mixedgc/TestOldGenCollectionUsage.java https://github.com/adoptium/aqa-tests/issues/3297 linux-arm
 gc/g1/Test2GbHeap.java https://github.com/adoptium/aqa-tests/issues/3297 linux-arm
@@ -230,7 +232,7 @@ java/rmi/activation/Activatable/nonExistentActivatable/NonExistentActivatable.ja
 
 ############################################################################
 
-# jdk_security
+# jdk_security1
 
 com/sun/crypto/provider/KeyAgreement/SupportedDHParamGens.java https://github.com/adoptium/infrastructure/issues/2893 solaris-sparcv9
 com/sun/crypto/provider/KeyAgreement/SupportedDHParamGens.java https://github.com/adoptium/aqa-tests/issues/1051 linux-s390x
@@ -238,13 +240,11 @@ java/security/KeyPairGenerator/SolarisShortDSA.java https://github.com/adoptium/
 java/security/MessageDigest/TestDigestIOStream.java https://github.com/adoptium/aqa-tests/issues/1051 linux-s390x
 javax/xml/crypto/dsig/LineFeedOnlyTest.java https://github.com/adoptium/aqa-tests/issues/2356 windows-all
 sun/security/pkcs11/KeyStore/SecretKeysBasic.sh https://bugs.openjdk.java.net/browse/JDK-8189603 linux-all,macosx-all,windows-all
-sun/security/pkcs11/Secmod/AddTrustedCert.java https://github.com/adoptium/aqa-tests/issues/125 linux-all
 sun/security/pkcs11/Signature/TestDSAKeyLength.java https://github.com/adoptium/aqa-tests/issues/70 linux-all
 sun/security/pkcs11/ec/TestECDH.java https://github.com/adoptium/aqa-tests/issues/70 linux-all
 sun/security/pkcs11/ec/TestECDSA.java https://github.com/adoptium/aqa-tests/issues/70 linux-all
 sun/security/pkcs11/ec/TestECGenSpec.java https://github.com/adoptium/aqa-tests/issues/70 linux-all
 sun/security/pkcs11/rsa/TestCACerts.java https://github.com/adoptium/aqa-tests/issues/68 linux-all
-sun/security/pkcs11/tls/TestKeyMaterial.java https://github.com/adoptium/aqa-tests/issues/71 linux-all
 sun/security/rsa/TestCACerts.java https://github.com/adoptium/aqa-tests/issues/68 generic-all
 com/sun/crypto/provider/Mac/MacClone.java https://bugs.openjdk.java.net/browse/JDK-7087021 solaris-all
 javax/net/ssl/ServerName/BestEffortOnLazyConnected.java https://bugs.openjdk.org/browse/JDK-8155049 solaris-x64
@@ -256,12 +256,13 @@ sun/security/pkcs11/KeyStore/ClientAuth.sh https://bugs.openjdk.org/browse/JDK-7
 sun/security/pkcs11/sslecc/ClientJSSEServerJSSE.java https://bugs.openjdk.org/browse/JDK-8042583 solaris-x64
 sun/security/pkcs11/fips/ClientJSSEServerJSSE.java https://github.com/adoptium/aqa-tests/issues/4150 solaris-sparcv9
 sun/security/ssl/SSLSocketImpl/AsyncSSLSocketClose.java https://bugs.openjdk.org/browse/JDK-8224829 solaris-x64
+java/security/cert/CertPathBuilder/akiExt/AKISerialNumber.java https://bugs.openjdk.org/browse/JDK-8325096 linux-arm
 
 ############################################################################
 
 # jdk_security3
 
-sun/security/lib/cacerts/VerifyCACerts.java https://github.com/adoptium/aqa-tests/issues/2123 generic-all
+sun/security/lib/cacerts/VerifyCACerts.java https://github.com/adoptium/aqa-tests/issues/4808 generic-all
 sun/security/pkcs11/Secmod/TestNssDbSqlite.java https://github.com/adoptium/aqa-tests/issues/2123 generic-all
 sun/security/ssl/X509TrustManagerImpl/Symantec/Distrust.java https://github.com/adoptium/aqa-tests/issues/2123 generic-all
 sun/security/tools/jarsigner/diffend.sh https://github.com/adoptium/infrastructure/issues/2623 linux-all
@@ -287,16 +288,6 @@ sun/security/krb5/auto/Unreachable.java https://github.com/adoptium/aqa-tests/is
 
 # jdk_security_infra
 
-security/infra/java/security/cert/CertPathValidator/certification/GoogleCA.java https://bugs.openjdk.org/browse/JDK-8309088 generic-all
-security/infra/java/security/cert/CertPathValidator/certification/AmazonCA.java https://bugs.openjdk.org/browse/JDK-8309088 generic-all
-security/infra/java/security/cert/CertPathValidator/certification/LuxTrustCA.java https://github.com/adoptium/aqa-tests/issues/2074 generic-all
-security/infra/java/security/cert/CertPathValidator/certification/BuypassCA.java https://github.com/adoptium/aqa-tests/issues/2074 generic-all
-security/infra/java/security/cert/CertPathValidator/certification/QuoVadisCA.java https://github.com/adoptium/aqa-tests/issues/2074 generic-all
-security/infra/java/security/cert/CertPathValidator/certification/EntrustCA.java https://github.com/adoptium/aqa-tests/issues/2074 generic-all
-security/infra/java/security/cert/CertPathValidator/certification/DTrustCA.java https://github.com/adoptium/aqa-tests/issues/2074 generic-all
-security/infra/java/security/cert/CertPathValidator/certification/HaricaCA.java https://github.com/adoptium/aqa-tests/issues/2074 generic-all
-security/infra/java/security/cert/CertPathValidator/certification/DigicertCSRootG5.java https://github.com/adoptium/aqa-tests/issues/2074 generic-all
-security/infra/java/security/cert/CertPathValidator/certification/EmSignRootG2CA.java https://github.com/adoptium/aqa-tests/issues/2074 generic-all
 ############################################################################
 # jdk_sound
 
@@ -310,13 +301,7 @@ javax/sound/midi/Devices/InitializationHang.java https://github.com/adoptium/aqa
 
 # jdk_text
 
-java/text/BreakIterator/BreakIteratorTest.java https://bugs.openjdk.java.net/browse/JDK-8031145 generic-all
-java/text/Format/DateFormat/DateFormatTest.java https://bugs.openjdk.java.net/browse/JDK-8031145 generic-all
-java/text/Format/DateFormat/NonGregorianFormatTest.java https://bugs.openjdk.java.net/browse/JDK-8031145 generic-all
-java/text/Format/MessageFormat/LargeMessageFormat.java https://bugs.openjdk.java.net/browse/JDK-8031145 generic-all
-java/text/Format/NumberFormat/NumberRegression.java https://bugs.openjdk.java.net/browse/JDK-8031145 generic-all
-java/text/Format/NumberFormat/NumberTest.java https://bugs.openjdk.java.net/browse/JDK-8031145 generic-all
-sun/text/IntHashtable/Bug4170614Test.sh https://bugs.openjdk.java.net/browse/JDK-8031145 generic-all
+java/text/BreakIterator/BreakIteratorTest.java https://bugs.openjdk.org/browse/JDK-8229922 generic-all
 
 ############################################################################
 
@@ -374,13 +359,10 @@ com/sun/jdi/PrivateTransportTest.sh https://github.com/adoptium/aqa-tests/issues
 # jdk_util
 
 java/util/Arrays/TimSortStackSize2.java https://github.com/adoptium/aqa-tests/issues/1051 linux-s390x
-java/util/Calendar/CalendarRegression.java https://bugs.openjdk.java.net/browse/JDK-8031145 generic-all
-java/util/Calendar/JapanEraNameCompatTest.java https://bugs.openjdk.java.net/browse/JDK-8218781 generic-all
 java/util/Locale/LocaleProviders.sh https://github.com/adoptium/aqa-tests/issues/1261 windows-all
 java/util/Random/RandomTest.java https://github.com/adoptium/aqa-tests/issues/1051 linux-s390x
 java/util/ResourceBundle/Control/Bug6530694.java https://github.com/adoptium/aqa-tests/issues/137 macosx-all
 java/util/Spliterator/SpliteratorTraversingAndSplittingTest.java https://github.com/adoptium/aqa-tests/issues/1051 linux-s390x
-java/util/TimeZone/HongKong.java https://bugs.openjdk.java.net/browse/JDK-8031145 generic-all
 java/util/concurrent/locks/Lock/TimedAcquireLeak.java https://github.com/adoptium/aqa-tests/issues/1259 macosx-all
 java/util/logging/TestLoggerWeakRefLeak.java https://github.com/adoptium/aqa-tests/issues/1259 macosx-all
 java/util/stream/boottest/java/util/stream/SpinedBufferTest.java https://github.com/adoptium/aqa-tests/issues/1051 linux-s390x
@@ -428,12 +410,11 @@ javax/imageio/spi/AppletContextTest/BadPluginConfigurationTest.sh https://github
 # jdk_jfr
 
 jdk/jfr/api/flightrecorder/TestGetEventTypes.java https://bugs.openjdk.org/browse/JDK-8309729 solaris-sparcv9
-jdk/jfr/event/sampling/TestNative.java https://github.com/adoptium/aqa-tests/issues/2754#issuecomment-882618581 generic-all
+jdk/jfr/event/sampling/TestNative.java https://github.com/adoptium/aqa-tests/issues/2754#issuecomment-1964356593 macosx-all
 jdk/jfr/jcmd/TestJcmdDumpPathToGCRoots.java https://github.com/adoptium/aqa-tests/issues/2766 generic-all
 # jdk/jfr/event/runtime/TestShutdownEvent.java https://github.com/adoptium/aqa-tests/issues/3301 linux-arm
 jdk/jfr/event/runtime/TestShutdownEvent.java https://github.com/adoptium/aqa-tests/issues/2985 generic-all
-jdk/jfr/event/io/TestInstrumentation.java https://bugs.openjdk.java.net/browse/JDK-8202142 generic-all
-jdk/jfr/event/compiler/TestCompilerPhase.java https://github.com/adoptium/aqa-tests/issues/3046 generic-all
+jdk/jfr/event/compiler/TestCompilerPhase.java https://bugs.openjdk.org/browse/JDK-8326521 generic-all
 jdk/jfr/event/compiler/TestCompile.java https://github.com/adoptium/aqa-tests/issues/3301 linux-arm
 jdk/jfr/event/gc/collection/TestGCCauseWithG1ConcurrentMark.java https://github.com/adoptium/aqa-tests/issues/3301 linux-arm
 jdk/jfr/event/gc/collection/TestGCCauseWithG1FullCollection.java https://github.com/adoptium/aqa-tests/issues/3301 linux-arm
@@ -456,7 +437,7 @@ jdk/jfr/event/runtime/TestSizeTFlags.java https://github.com/adoptium/aqa-tests/
 jdk/jfr/jvm/TestLargeJavaEvent512k.java https://github.com/adoptium/aqa-tests/issues/3301 linux-arm
 jdk/jfr/event/compiler/TestCodeSweeper.java https://github.com/adoptium/aqa-tests/issues/3043 macosx-all,windows-all
 jdk/jfr/event/compiler/TestCodeCacheFull.java https://github.com/adoptium/aqa-tests/issues/3042 macosx-all,windows-all
-jdk/jfr/event/compiler/TestCompilerCompile.java https://github.com/adoptium/aqa-tests/issues/3046 generic-all
+jdk/jfr/event/compiler/TestCompilerCompile.java https://bugs.openjdk.org/browse/JDK-8326529 generic-all
 jdk/jfr/event/gc/heapsummary/TestHeapSummaryEventDefNewSerial.java https://github.com/adoptium/aqa-tests/issues/3254 solaris-sparcv9
 jdk/jfr/event/gc/heapsummary/TestHeapSummaryEventPSParOld.java https://github.com/adoptium/aqa-tests/issues/3254 solaris-sparcv9
 jdk/jfr/event/gc/heapsummary/TestHeapSummaryEventPSSerial.java https://github.com/adoptium/aqa-tests/issues/3254 solaris-sparcv9

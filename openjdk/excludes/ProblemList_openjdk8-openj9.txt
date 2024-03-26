@@ -34,7 +34,6 @@ java/lang/SecurityManager/CheckPackageAccess.java		https://github.com/eclipse-op
 java/lang/String/CaseConvertSameInstance.java           https://github.com/eclipse-openj9/openj9/issues/3303   generic-all
 java/lang/String/CaseInsensitiveComparator.java		https://github.com/eclipse-openj9/openj9/issues/1128	generic-all
 java/lang/StringBuilder/Exceptions.java		https://github.com/eclipse-openj9/openj9/issues/1128	generic-all
-java/lang/StringBuilder/HugeCapacity.java	https://github.com/eclipse-openj9/openj9/issues/17323	linux-s390x
 java/lang/StringBuilder/Supplementary.java https://github.com/eclipse-openj9/openj9/issues/5315 linux-s390x
 java/lang/StringBuffer/Exceptions.java		https://github.com/eclipse-openj9/openj9/issues/1128	generic-all
 java/lang/StringBuffer/TestSynchronization.java		https://github.com/eclipse-openj9/openj9/issues/1128	generic-all
@@ -233,13 +232,17 @@ java/rmi/activation/CommandEnvironment/SetChildEnv.java		https://github.com/ecli
 java/rmi/activation/rmidViaInheritedChannel/InheritedChannelNotServerSocket.java	https://github.ibm.com/runtimes/backlog/issues/622	windows-all
 java/rmi/dgc/dgcAckFailure/DGCAckFailure.java		https://github.com/eclipse-openj9/openj9/issues/1144	generic-all
 java/rmi/dgc/retryDirtyCalls/RetryDirtyCalls.java		https://github.com/eclipse-openj9/openj9/issues/1144	generic-all
+java/rmi/Naming/legalRegistryNames/LegalRegistryNames.java https://github.ibm.com/runtimes/backlog/issues/867 macosx-x64
+java/rmi/Naming/DefaultRegistryPort.java https://github.ibm.com/runtimes/backlog/issues/867 macosx-x64
 java/rmi/registry/readTest/readTest.sh		https://github.com/eclipse-openj9/openj9/issues/13259	windows-all
 java/rmi/registry/serialFilter/RegistryFilterTest.java		https://github.com/eclipse-openj9/openj9/issues/1144	generic-all
 java/rmi/server/UnicastRemoteObject/unexportObject/UnexportLeak.java	https://github.com/eclipse-openj9/openj9/issues/4094	generic-all
 java/rmi/server/RMISocketFactory/useSocketFactory/activatable/UseCustomSocketFactory.java	https://github.com/eclipse-openj9/openj9/issues/4685	linux-ppc64le
 java/rmi/server/RMISocketFactory/useSocketFactory/unicast/TCPEndpointReadBug.java	https://github.com/eclipse-openj9/openj9/issues/8515	generic-all
+java/rmi/server/RMISocketFactory/useSocketFactory/unicast/UseCustomSocketFactory.java   https://github.ibm.com/runtimes/backlog/issues/1024 windows-x64
 java/rmi/server/RemoteObject/notExtending/NotExtending.java		https://github.com/eclipse-openj9/openj9/issues/1144	generic-all
 java/rmi/server/RemoteServer/AddrInUse.java		https://github.com/eclipse-openj9/openj9/issues/3377	generic-all
+java/rmi/server/Unreferenced/leaseCheckInterval/LeaseCheckInterval.java https://github.com/eclipse-openj9/openj9/issues/12948 windows-x64
 java/rmi/transport/dgcDeadLock/DGCDeadLock.java	https://github.com/adoptium/aqa-tests/issues/1259	macosx-all
 java/rmi/transport/handshakeTimeout/HandshakeTimeout.java	https://github.ibm.com/runtimes/backlog/issues/722	macosx-all
 java/rmi/transport/runtimeThreadInheritanceLeak/RuntimeThreadInheritanceLeak.java		https://github.com/eclipse-openj9/openj9/issues/1144	generic-all
@@ -272,6 +275,7 @@ com/sun/crypto/provider/Cipher/AES/TestAESCiphers/TestAESWithRemoveAddProvider.j
 
 # jdk_security1
 
+java/security/cert/CertPathBuilder/akiExt/AKISerialNumber.java https://github.com/eclipse-openj9/openj9/issues/18875 generic-all
 java/security/KeyPairGenerator/FinalizeHalf.java https://github.com/eclipse-openj9/openj9/issues/8879 windows-all
 java/security/Signature/SignatureLength.java https://github.com/eclipse-openj9/openj9/issues/12083 windows-all
 
@@ -296,6 +300,7 @@ sun/security/ssl/X509TrustManagerImpl/Symantec/Distrust.java	https://github.com/
 ############################################################################
 # jdk_security4
 
+sun/security/krb5/auto/rcache_usemd5.sh https://github.com/eclipse-openj9/openj9/issues/18980 linux-all
 sun/security/krb5/auto/ReplayCacheTestProc.java https://github.com/adoptium/aqa-tests/issues/2349 generic-all
 sun/security/krb5/auto/Unreachable.java https://github.com/eclipse-openj9/openj9/issues/13253 aix-all,macosx-all
 

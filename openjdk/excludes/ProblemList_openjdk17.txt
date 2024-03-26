@@ -120,6 +120,7 @@ com/sun/jndi/dns/ConfigTests/Timeout.java https://bugs.openjdk.org/browse/JDK-82
 
 # jdk_net
 
+java/net/HttpURLConnection/HttpURLConnectionExpectContinueTest.java https://bugs.openjdk.org/browse/JDK-8314164 linux-all
 java/net/Inet4Address/PingThis.java https://github.com/adoptium/infrastructure/issues/1127 aix-all
 java/net/InetAddress/BadDottedIPAddress.java https://github.com/adoptium/aqa-tests/issues/593 linux-all
 java/net/InetAddress/CachedUnknownHostName.java https://github.com/adoptium/aqa-tests/issues/593 linux-all
@@ -220,7 +221,7 @@ java/nio/Buffer/DirectBufferAllocTest.java https://github.com/adoptium/aqa-tests
 javax/net/ssl/ServerName/SSLEngineExplorerWithCli.java https://bugs.openjdk.org/browse/JDK-8227651 generic-all
 javax/net/ssl/ServerName/SSLEngineExplorerWithSrv.java https://bugs.openjdk.org/browse/JDK-8227651 generic-all
 javax/net/ssl/SSLEngine/LargePacket.java https://bugs.openjdk.org/browse/JDK-8227651 generic-all
-sun/security/lib/cacerts/VerifyCACerts.java https://github.com/adoptium/aqa-tests/issues/2123 generic-all
+sun/security/lib/cacerts/VerifyCACerts.java https://github.com/adoptium/aqa-tests/issues/4808 generic-all
 sun/security/pkcs11/Secmod/AddTrustedCert.java https://github.com/adoptium/aqa-tests/issues/2123 linux-all
 sun/security/provider/SecureRandom/AbstractDrbg/SpecTest.java https://github.com/adoptium/aqa-tests/issues/2123 linux-all
 sun/security/ssl/X509TrustManagerImpl/Symantec/Distrust.java https://github.com/adoptium/aqa-tests/issues/2123 generic-all
@@ -408,29 +409,7 @@ compiler/splitif/TestCrashAtIGVNSplitIfSubType.java https://bugs.openjdk.org/bro
 
 # jdk_jfr
 
-jdk/jfr/event/oldobject/TestAllocationTime.java https://github.com/adoptium/aqa-tests/issues/2855 windows-x86
-jdk/jfr/event/oldobject/TestHeapDeep.java https://github.com/adoptium/aqa-tests/issues/2855 windows-x86
-jdk/jfr/jcmd/TestJcmdDumpPathToGCRoots.java https://github.com/adoptium/aqa-tests/issues/2855 windows-x86
-jdk/jfr/event/oldobject/TestG1.java https://github.com/adoptium/aqa-tests/issues/2855 windows-x86
-jdk/jfr/api/consumer/TestRecordedFrame.java https://github.com/adoptium/aqa-tests/issues/2855 windows-x86
-jdk/jfr/event/allocation/TestObjectAllocationInNewTLABEvent.java https://github.com/adoptium/aqa-tests/issues/2870 windows-x86,linux-arm
 jdk/jfr/event/gc/collection/TestG1ParallelPhases.java https://github.com/adoptium/aqa-tests/issues/2855 windows-x86
-jdk/jfr/event/oldobject/TestListenerLeak.java https://github.com/adoptium/aqa-tests/issues/2855 windows-x86
-jdk/jfr/event/oldobject/TestObjectAge.java https://github.com/adoptium/aqa-tests/issues/2855 windows-x86
-jdk/jfr/event/oldobject/TestReferenceChainLimit.java https://github.com/adoptium/aqa-tests/issues/2855 windows-x86
-jdk/jfr/event/oldobject/TestThreadLocalLeak.java https://github.com/adoptium/aqa-tests/issues/2855 windows-x86
-jdk/jfr/jmx/streaming/TestClose.java https://github.com/adoptium/aqa-tests/issues/2865 windows-x86,linux-arm
-jdk/jfr/jmx/streaming/TestDelegated.java https://github.com/adoptium/aqa-tests/issues/2866 windows-x86,linux-arm
-jdk/jfr/jmx/streaming/TestEnableDisable.java https://github.com/adoptium/aqa-tests/issues/2866 windows-x86,linux-arm
-jdk/jfr/jmx/streaming/TestRemoteDump.java https://github.com/adoptium/aqa-tests/issues/2866 windows-x86,linux-arm
-jdk/jfr/jmx/streaming/TestRotate.java https://github.com/adoptium/aqa-tests/issues/2866 windows-x86,linux-arm
-jdk/jfr/jmx/streaming/TestSetSettings.java https://github.com/adoptium/aqa-tests/issues/2866 windows-x86,linux-arm
-jdk/jfr/event/gc/detailed/TestZUncommitEvent.java https://bugs.openjdk.org/browse/JDK-8248078 generic-all
-jdk/jfr/event/gc/detailed/TestGCLockerEvent.java https://github.com/adoptium/aqa-tests/issues/3817 windows-x64
-jdk/jfr/event/compiler/TestCodeCacheFull.java https://github.com/adoptium/aqa-tests/issues/3277 windows-x86
-jdk/jfr/event/compiler/TestCompilerInlining.java https://github.com/adoptium/aqa-tests/issues/3277 windows-x86
-jdk/jfr/event/compiler/TestCompilerPhase.java https://github.com/adoptium/aqa-tests/issues/3277 windows-x86
-jdk/jfr/api/consumer/log/TestVerbosity.java https://bugs.openjdk.org/browse/JDK-8269723 generic-all
 
 ###########################################################################
 

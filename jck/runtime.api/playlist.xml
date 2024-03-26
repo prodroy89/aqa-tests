@@ -12,17 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 -->
-<playlist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../TKG/playlist.xsd">
+<playlist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../TKG/resources/playlist.xsd">
 	<include>../jck.mk</include>
 	<test>
-		<testCaseName>jck_custom</testCaseName>
+		<testCaseName>jckruntime_custom</testCaseName>
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>
-		<command>$(JCK_CMD_TEMPLATE) tests=$(JCK_CUSTOM_TARGET) task=custom; \
-	$(TEST_STATUS)</command>
+		<command>$(GEN_JTB_GENERIC) testsuite=RUNTIME tests="$(JCKRUNTIME_CUSTOM_TARGET)" isCustomTarget="isCustomTarget"; \
+		$(EXEC_RUNTIME_TEST); \
+		$(TEST_STATUS); \
+		$(GEN_SUMMARY_GENERIC) testsuite=RUNTIME tests="$(JCKRUNTIME_CUSTOM_TARGET)" isCustomTarget="isCustomTarget"
+		</command>
 		<levels>
-			<level>extended</level>
+			<level>dev</level>
 		</levels>
 		<groups>
 			<group>jck</group>

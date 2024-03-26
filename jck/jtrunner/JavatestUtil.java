@@ -94,6 +94,7 @@ public class JavatestUtil {
 	private static String secPropsFile;
 	private static String testFlag;
 	private static String task;
+	private static String isCustomTarget = "notCustomTarget";
 	private static String agentHost;
 	private static String testJavaForMultiJVMCompTest;
 	private static String riJavaForMultiJVMCompTest;
@@ -123,6 +124,7 @@ public class JavatestUtil {
 	private static final String WORK_DIR = "workdir";
 	private static final String SPEC = "spec";
 	private static final String CUSTOM_JTX = "customJtx";
+	private static final String IS_CUSTOM_TARGET = "isCustomTarget";
 
 	public static void main(String args[]) throws Exception {
 		ArrayList<String> essentialParameters = new ArrayList<String>(); 
@@ -144,6 +146,7 @@ public class JavatestUtil {
 		essentialParameters.add(WORK_DIR);
 		essentialParameters.add(SPEC);
 		essentialParameters.add(CUSTOM_JTX);
+		essentialParameters.add(IS_CUSTOM_TARGET);
 
 		for (String arg : args) {
 			if (arg.contains("=")) {
@@ -153,7 +156,7 @@ public class JavatestUtil {
 				
 				// We only load testArgs with key,value pairs that are needed by the JavatestUtil 
 				if (essentialParameters.contains(key)) {
-					// This is a special case for JCK where we may supply multiple sub-folders to run
+					// This is a special case to supply multiple sub-folders separating by semicolon( another option is directively supply with double quoted multiple sub-folders separating by space.
 					if(value.contains(";")) {
 						value = value.trim().replace("\n", "").replace("\r", "");
 						String [] tests = value.split(";");
@@ -483,7 +486,7 @@ public class JavatestUtil {
 			if (spec.contains("win")) {
 				libPath = "PATH";
 				robotAvailable = "Yes";
-			} else if (spec.contains("alpine-linux")) {
+			} else if (spec.contains("alpine-linux") || spec.contains("riscv64")) {
 				libPath = "LD_LIBRARY_PATH";
 				robotAvailable = "No";
 			} else if (spec.contains("linux")) {
@@ -529,7 +532,7 @@ public class JavatestUtil {
 			}
 
 			if ( testsRequireDisplay(tests) ) {
-				if (spec.contains("zos") || spec.contains("alpine-linux")) {
+				if (spec.contains("zos") || spec.contains("alpine-linux") || spec.contains("riscv")) {
 					fileContent += "set jck.env.testPlatform.headless Yes" + ";\n";
 				}
 				else {
@@ -854,8 +857,9 @@ public class JavatestUtil {
 		}
 
 		// Only use default initial jtx exclude and disregard the rest of jck exclude lists 
-		// when running a test via jck_custom.
-		if (task == null || !task.equals("custom")) {  
+		// when running a test via jck***_custom.
+		
+		if (testArgs.get(IS_CUSTOM_TARGET) == null) {
 			fileContent += "set jck.excludeList.customFiles \"" + initialJtxFullPath + " " + defaultJtxFullPath + " " + kflFullPath + " " + customJtx + "\";\n";
 		} else {
 			fileContent += "set jck.excludeList.customFiles \"" + initialJtxFullPath + " " + defaultJtxFullPath + " " + kflFullPath + "\";\n";

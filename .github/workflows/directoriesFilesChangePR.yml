@@ -15,7 +15,7 @@ jobs:
     outputs:
       buildLists: ${{ steps.locations_parse.outputs.build_lists }}
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
       - uses: jitterbit/get-changed-files@v1
         id: get_change
         continue-on-error: true
@@ -38,7 +38,7 @@ jobs:
         build_list: ${{ fromJson(needs.getBuildLists.outputs.buildLists) }}
         impl: [hotspot, openj9]
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
       - uses: AdoptOpenJDK/install-jdk@v1
         with:
           version: ${{ matrix.version }}
@@ -52,7 +52,7 @@ jobs:
           jdksource: 'install-jdk'
           version: ${{ matrix.version }}
           openjdk_testRepo: '${{ github.event.pull_request.head.repo.full_name }}:${{ github.head_ref }}'
-      - uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
+      - uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         if: failure()
         with:
           name: output_changed_based_build_list

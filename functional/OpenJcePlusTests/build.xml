@@ -28,6 +28,7 @@
 	<property name="build" location="./bin" />
 	<property name="LIB" value="junit4,hamcrest_core,bcprov_jdk18on"/>
 	<import file="${TEST_ROOT}/TKG/scripts/getDependencies.xml"/>
+	<property environment="env" />
 
 	<target name="openJcePlusTests.check">
 		<condition property="openJcePlusTests.exists">
@@ -36,19 +37,27 @@
 	</target>
 
 	<if>
-		<contains string="${SPEC}" substring="zos"/>
+		<isset property="env.OPENJCEPLUS_GIT_REPO"/>
 		<then>
-			<property name="GIT_REPO" value="git@github.com:" />
+			<property name="openjceplusGitRepo" value="${env.OPENJCEPLUS_GIT_REPO}"/>
 		</then>
 		<else>
-			<property name="GIT_REPO" value="https://github.com/" />
+			<property name="openjceplusGitRepo" value="https://github.com/IBM/OpenJCEPlus.git"/>
 		</else>
 	</if>
+	<if>
+		<isset property="env.OPENJCEPLUS_GIT_BRANCH"/>
+		<then>
+			<property name="openjceplusGitBranch" value="${env.OPENJCEPLUS_GIT_BRANCH}"/>
+		</then>
+		<else>
+			<property name="openjceplusGitBranch" value="java${JDK_VERSION}"/>
+		</else>
+	</if>
+
 	<target name="getOpenJcePlusTests" depends="openJcePlusTests.check" unless="openJcePlusTests.exists">
-		<exec executable="git" failonerror="true">
-			<arg value="clone" />
-			<arg value="${GIT_REPO}IBM/OpenJCEPlus.git" />
-		</exec>
+		<getFileWithRetry file="OpenJCEPlus" command="git clone --depth 1 -q ${openjceplusGitRepo} -b ${openjceplusGitBranch} OpenJCEPlus"/>
+		<checkGitRepoSha repoDir="OpenJCEPlus"/>
 		<delete dir="./OpenJCEPlus/src/main" />
 	</target>
 
@@ -84,6 +93,9 @@
 		</jar>
 		<copy todir="${DEST}">
 			<fileset dir="${src}/../../" includes="*.xml,*.mk" />
+			<fileset dir="${LIB_DIR}/" includes="junit4.jar" />
+			<fileset dir="${LIB_DIR}/" includes="hamcrest-core.jar" />
+			<fileset dir="${LIB_DIR}/" includes="bcprov-jdk18on.jar" />
 		</copy>
 	</target>
 
@@ -99,12 +111,15 @@
 				<and>
 					<equals arg1="${JDK_VENDOR}" arg2="ibm" />
 					<equals arg1="${JDK_IMPL}" arg2="openj9" />
-					<equals arg1="${JDK_VERSION}" arg2="17" />
+					<not>
+						<matches string="${JDK_VERSION}" pattern="^(8)$$" />
+					</not>
 					<or>
 						<contains string="${SPEC}" substring="aix_ppc-64"/>
 						<contains string="${SPEC}" substring="linux_ppc-64_le"/>
 						<contains string="${SPEC}" substring="linux_x86-64"/>
 						<contains string="${SPEC}" substring="win_x86-64"/>
+						<contains string="${SPEC}" substring="linux_390-64"/>
 					</or>
 				</and>
 			</or>

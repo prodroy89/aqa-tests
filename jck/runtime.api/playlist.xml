@@ -1176,13 +1176,6 @@
 	</test>
 	<test>
 		<testCaseName>jck-runtime-api-serializabletypes</testCaseName>
-		<disables>
-			<disable>
-				<comment>Disabled on aarch64_mac due to backlog/issues/1300.</comment>
-				<platform>aarch64_mac.*</platform>
-				<impl>openj9</impl>
-			</disable>
-		</disables>
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>

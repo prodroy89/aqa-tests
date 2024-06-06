@@ -446,7 +446,6 @@
 		</command>
 		<levels>
 			<level>sanity</level>
-			<level>FRT_Runtime_API_VM</level>
 		</levels>
 		<groups>
 			<group>jck</group>

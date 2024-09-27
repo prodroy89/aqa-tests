@@ -966,7 +966,7 @@ def testBuild() {
 				if (PLATFORM.contains("mac")) {
 					sh "find /cores -name '*core*' -print 2>/dev/null -exec rm -f {} \\; || true"
 				} else if (PLATFORM.contains("windows")) {
-					sh "find C:\temp -name '*core*' -print 2>/dev/null -exec rm -f {} \\; || true"
+					sh "find /cygdrive/c/ -name '*core*' -print 2>/dev/null -exec rm -f {} \\; || true"
 				} else {
 					sh "find /tmp -name '*core*' -print 2>/dev/null -exec rm -f {} \\; || true"
 				}

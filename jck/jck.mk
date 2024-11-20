@@ -52,6 +52,10 @@ ifeq (11, $(JDK_VERSION))
    JCK_VERSION_NUMBER = 11a
 endif
 
+ifeq (17, $(JDK_VERSION))
+   JCK_VERSION_NUMBER = 17a
+endif
+
 JCK_VERSION = jck$(JCK_VERSION_NUMBER)
 
 ifneq (,$(findstring zos,$(SPEC)))

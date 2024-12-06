@@ -846,7 +846,7 @@ public class JavatestUtil {
 				jxcCmd = jckBase + File.separator + "linux" + File.separator + "bin" + File.separator + "schemagen.sh";
 				genCmd = jckBase + File.separator + "linux" + File.separator + "bin" + File.separator + "wsgen.sh";
 				impCmd = jckBase + File.separator + "linux" + File.separator + "bin" + File.separator + "wsimport.sh";
-			} else if (spec.contains("unix") || spec.contains("zos")) {
+			} else if (spec.contains("unix")) {
 				xjcCmd = jckBase + File.separator + "unix" + File.separator + "bin" + File.separator + "xjc.sh";
 				jxcCmd = jckBase + File.separator + "unix" + File.separator + "bin" + File.separator + "schemagen.sh";
 				genCmd = jckBase + File.separator + "unix" + File.separator + "bin" + File.separator + "wsgen.sh";

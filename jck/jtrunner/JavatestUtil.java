@@ -1180,7 +1180,7 @@ public class JavatestUtil {
 			return "zos";
 		}
 		if (spec.contains("unix")) {
-			return "zos";
+			return "unix";
 		}
 		if (spec.contains("win")) {
 			return "win";

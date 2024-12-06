@@ -846,7 +846,7 @@ public class JavatestUtil {
 				jxcCmd = jckBase + File.separator + "linux" + File.separator + "bin" + File.separator + "schemagen.sh";
 				genCmd = jckBase + File.separator + "linux" + File.separator + "bin" + File.separator + "wsgen.sh";
 				impCmd = jckBase + File.separator + "linux" + File.separator + "bin" + File.separator + "wsimport.sh";
-			} else if (spec.contains("unix")) {
+			} else if (spec.contains("unix") || spec.contains("zos")) {
 				xjcCmd = jckBase + File.separator + "unix" + File.separator + "bin" + File.separator + "xjc.sh";
 				jxcCmd = jckBase + File.separator + "unix" + File.separator + "bin" + File.separator + "schemagen.sh";
 				genCmd = jckBase + File.separator + "unix" + File.separator + "bin" + File.separator + "wsgen.sh";
@@ -875,7 +875,7 @@ public class JavatestUtil {
 			} else if (spec.contains("sunos")) {
 				xjcCmd = "ksh " + xjcCmd;
 				jxcCmd = "ksh " + jxcCmd;
-			} else if (spec.contains("unix")) {
+			} else if (spec.contains("unix") || spec.contains("zos")) {
 				xjcCmd = "sh " + xjcCmd;
 				jxcCmd = "sh " + jxcCmd;
 			}

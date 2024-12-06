@@ -876,8 +876,8 @@ public class JavatestUtil {
 				xjcCmd = "ksh " + xjcCmd;
 				jxcCmd = "ksh " + jxcCmd;
 			} else if (spec.contains("unix") || spec.contains("zos")) {
-				xjcCmd = "sh " + xjcCmd;
-				jxcCmd = "sh " + jxcCmd;
+				xjcCmd = "ksh " + xjcCmd;
+				jxcCmd = "ksh " + jxcCmd;
 			}
 
 			fileContent += "concurrency " + concurrencyString + ";\n";

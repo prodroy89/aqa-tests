@@ -850,10 +850,10 @@ public class JavatestUtil {
 				genCmd = jckBase + File.separator + "linux" + File.separator + "bin" + File.separator + "wsgen.sh";
 				impCmd = jckBase + File.separator + "linux" + File.separator + "bin" + File.separator + "wsimport.sh";
 			} else if (spec.contains("unix") || spec.contains("zos")) {
-				xjcCmd = jckBase + File.separator + "unix" + File.separator + "bin" + File.separator + "xjc.sh";
-				jxcCmd = jckBase + File.separator + "unix" + File.separator + "bin" + File.separator + "schemagen.sh";
-				genCmd = jckBase + File.separator + "unix" + File.separator + "bin" + File.separator + "wsgen.sh";
-				impCmd = jckBase + File.separator + "unix" + File.separator + "bin" + File.separator + "wsimport.sh";
+				xjcCmd = jckBase + File.separator + "solaris" + File.separator + "bin" + File.separator + "xjc.sh";
+				jxcCmd = jckBase + File.separator + "solaris" + File.separator + "bin" + File.separator + "schemagen.sh";
+				genCmd = jckBase + File.separator + "solaris" + File.separator + "bin" + File.separator + "wsgen.sh";
+				impCmd = jckBase + File.separator + "solaris" + File.separator + "bin" + File.separator + "wsimport.sh";
 			} else if (spec.contains("osx")) {
 				xjcCmd = jckBase + File.separator + "macos" + File.separator + "bin" + File.separator + "xjc.sh";
 				jxcCmd = jckBase + File.separator + "macos" + File.separator + "bin" + File.separator + "schemagen.sh";

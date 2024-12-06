@@ -485,6 +485,9 @@ public class JavatestUtil {
 		if (spec.contains("zos")) {
 			extraJvmOptions += " -Dfile.encoding=US-ASCII";
 		}
+		if (spec.contains("unix")) {
+			extraJvmOptions += " -Dfile.encoding=US-ASCII";
+		}
 
 		// testExecutionType of multiJVM_group on Windows and AIX causes memory
 		// exhaustion, so limit to non-group multiJVM
@@ -876,8 +879,8 @@ public class JavatestUtil {
 				xjcCmd = "ksh " + xjcCmd;
 				jxcCmd = "ksh " + jxcCmd;
 			} else if (spec.contains("unix") || spec.contains("zos")) {
-				xjcCmd = "ksh " + xjcCmd;
-				jxcCmd = "ksh " + jxcCmd;
+				xjcCmd = "sh " + xjcCmd;
+				jxcCmd = "sh " + jxcCmd;
 			}
 
 			fileContent += "concurrency " + concurrencyString + ";\n";
@@ -1174,6 +1177,9 @@ public class JavatestUtil {
 			return "linux";
 		}
 		if (spec.contains("zos")) {
+			return "zos";
+		}
+		if (spec.contains("unix")) {
 			return "zos";
 		}
 		if (spec.contains("win")) {

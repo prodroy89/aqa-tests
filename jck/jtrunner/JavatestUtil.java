@@ -484,10 +484,10 @@ public class JavatestUtil {
         //extraJvmOptions += " -Dfile.encoding=UTF-8";
 		//extraJvmOptions += " -Dfile.encoding=US-ASCII";
 		if (spec.contains("zos")) {
-			extraJvmOptions += " ";
+			extraJvmOptions += " -Dfile.encoding=UTF-8 ";
 		}
 		if (spec.contains("unix")) {
-			extraJvmOptions += " ";
+			extraJvmOptions += " -Dfile.encoding=UTF-8 ";
 		}
 
 		// testExecutionType of multiJVM_group on Windows and AIX causes memory

@@ -483,10 +483,10 @@ public class JavatestUtil {
 		}
 
 		if (spec.contains("zos")) {
-			extraJvmOptions += " -Dfile.encoding=US-ASCII";
+			extraJvmOptions += " -Dfile.encoding=UTF-8";
 		}
 		if (spec.contains("unix")) {
-			extraJvmOptions += " -Dfile.encoding=US-ASCII";
+			extraJvmOptions += " -Dfile.encoding=UTF-8";
 		}
 
 		// testExecutionType of multiJVM_group on Windows and AIX causes memory
@@ -881,6 +881,8 @@ public class JavatestUtil {
 			} else if (spec.contains("unix") || spec.contains("zos")) {
 				xjcCmd = "sh " + xjcCmd;
 				jxcCmd = "sh " + jxcCmd;
+				genCmd = "sh " + genCmd;
+				impCmd = "sh " + impCmd;
 			}
 
 			fileContent += "concurrency " + concurrencyString + ";\n";
@@ -948,6 +950,13 @@ public class JavatestUtil {
 		bw.close();
 
 		if (spec.contains("zos")) {
+			if (!doIconvFile()) {
+				System.out.println("Failed to convert jtb file encoding for z/OS");
+				return false;
+			}
+		}
+
+		if (spec.contains("unix")) {
 			if (!doIconvFile()) {
 				System.out.println("Failed to convert jtb file encoding for z/OS");
 				return false;

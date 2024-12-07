@@ -481,12 +481,12 @@ public class JavatestUtil {
 			concurrency = Runtime.getRuntime().availableProcessors() + 1;
 			concurrencyString = String.valueOf(concurrency);
 		}
-
+        //extraJvmOptions += " -Dfile.encoding=UTF-8";
 		if (spec.contains("zos")) {
-			extraJvmOptions += " -Dfile.encoding=UTF-8";
+			extraJvmOptions += " ";
 		}
 		if (spec.contains("unix")) {
-			extraJvmOptions += " -Dfile.encoding=UTF-8";
+			extraJvmOptions += " ";
 		}
 
 		// testExecutionType of multiJVM_group on Windows and AIX causes memory

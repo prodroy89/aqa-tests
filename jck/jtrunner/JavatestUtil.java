@@ -487,7 +487,7 @@ public class JavatestUtil {
 			extraJvmOptions += " ";
 		}
 		if (spec.contains("unix")) {
-			extraJvmOptions += " -Dfile.encoding=US-ASCII ";
+			extraJvmOptions += " ";
 		}
 
 		// testExecutionType of multiJVM_group on Windows and AIX causes memory

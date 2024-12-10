@@ -481,13 +481,10 @@ public class JavatestUtil {
 			concurrency = Runtime.getRuntime().availableProcessors() + 1;
 			concurrencyString = String.valueOf(concurrency);
 		}
-        //extraJvmOptions += " -Dfile.encoding=UTF-8";
-		//extraJvmOptions += " -Dfile.encoding=US-ASCII";
+		// extraJvmOptions += " -Dfile.encoding=UTF-8";
+		// extraJvmOptions += " -Dfile.encoding=US-ASCII";
 		if (spec.contains("zos")) {
-			extraJvmOptions += " -Dfile.encoding=UTF-8 ";
-		}
-		if (spec.contains("unix")) {
-			extraJvmOptions += " -Dfile.encoding=UTF-8 ";
+			extraJvmOptions += " -Dfile.encoding=US-ASCII ";
 		}
 
 		// testExecutionType of multiJVM_group on Windows and AIX causes memory
@@ -742,6 +739,10 @@ public class JavatestUtil {
 				pathToLib = testJdk + File.separator + "lib";
 			}
 
+			if (spec.contains("zos") || tests.contains("api/javax_tools")) {
+				extraJvmOptions += " -Dfile.encoding=UTF-8 ";
+			}
+
 			fileContent += "concurrency " + concurrencyString + ";\n";
 			fileContent += "timeoutfactor 100" + ";\n"; // lang.CLSS,CONV,STMT,INFR requires more than 1h to complete.
 														// lang.Annot,EXPR,LMBD require more than 2h to complete tests
@@ -852,9 +853,12 @@ public class JavatestUtil {
 				impCmd = jckBase + File.separator + "linux" + File.separator + "bin" + File.separator + "wsimport.sh";
 			} else if (spec.contains("unix") || spec.contains("zos")) {
 				xjcCmd = jckBase + File.separator + "solaris" + File.separator + "bin" + File.separator + "ibm_xjc.sh";
-				jxcCmd = jckBase + File.separator + "solaris" + File.separator + "bin" + File.separator + "ibm_schemagen.sh";
-				genCmd = jckBase + File.separator + "solaris" + File.separator + "bin" + File.separator + "ibm_wsgen.sh";
-				impCmd = jckBase + File.separator + "solaris" + File.separator + "bin" + File.separator + "ibm_wsimport.sh";
+				jxcCmd = jckBase + File.separator + "solaris" + File.separator + "bin" + File.separator
+						+ "ibm_schemagen.sh";
+				genCmd = jckBase + File.separator + "solaris" + File.separator + "bin" + File.separator
+						+ "ibm_wsgen.sh";
+				impCmd = jckBase + File.separator + "solaris" + File.separator + "bin" + File.separator
+						+ "ibm_wsimport.sh";
 			} else if (spec.contains("osx")) {
 				xjcCmd = jckBase + File.separator + "macos" + File.separator + "bin" + File.separator + "xjc.sh";
 				jxcCmd = jckBase + File.separator + "macos" + File.separator + "bin" + File.separator + "schemagen.sh";

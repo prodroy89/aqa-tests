@@ -18,6 +18,10 @@
 
 # jdk_beans
 
+java/beans/XMLEncoder/java_awt_ScrollPane.java https://github.com/eclipse-openj9/openj9/issues/20531 macosx-all
+java/beans/Introspector/Test5102804.java https://github.com/eclipse-openj9/openj9/issues/20531 linux-all
+java/beans/PropertyEditor/Test6397609.java https://github.com/eclipse-openj9/openj9/issues/20531 linux-all
+
 ############################################################################
 
 # jdk_lang
@@ -125,6 +129,8 @@ sun/management/jmxremote/bootstrap/RmiSslNoKeyStoreTest.sh https://github.com/ad
 ############################################################################
 
 # jdk_jmx
+
+javax/management/MBeanServer/OldMBeanServerTest.java https://github.com/eclipse-openj9/openj9/issues/20777 generic-all
 
 ############################################################################
 

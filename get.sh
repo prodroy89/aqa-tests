@@ -397,34 +397,42 @@ getBinaryOpenjdk()
 		fi
 	done
 
-	for file_name in "${jdk_file_array[@]}"
+	for jar_name in "${jdk_file_array[@]}"
 	do
-		if [[ ! "$file_name" =~ "sbom" ]]; then
-			if [[ $file_name == *xz ]]; then
+		if [[ ! "$jar_name" =~ "sbom" ]]; then
+			if [[ $jar_name == *xz ]]; then
 				DECOMPRESS_TOOL=xz
 			else
 				# Noting that this will be set, but not used, for zip files
 				DECOMPRESS_TOOL=gzip
 			fi
-			if [[ "$file_name" =~ "debug-image" ]] || [[ "$file_name" =~ "debugimage" ]] || [[ "$file_name" =~ "symbols-" ]]; then
-				# if file_name contains debug-image, extract into j2sdk-image/jre or j2sdk-image dir
+			if [[ "$jar_name" =~ "debug-image" ]] || [[ "$jar_name" =~ "debugimage" ]] || [[ "$jar_name" =~ "symbols-" ]]; then
+				# if jar_name contains debug-image, extract into j2sdk-image/jre or j2sdk-image dir
 				# Otherwise, files will be extracted under ./tmp
 				extract_dir="./j2sdk-image"
 				if [ -d "$SDKDIR/jdkbinary/j2sdk-image/jre" ]; then
 					extract_dir="./j2sdk-image/jre"
 				fi
-				echo "Uncompressing $file_name over $extract_dir..."
+				echo "Uncompressing $jar_name over $extract_dir..."
+                                mkdir dir.$$ && cd dir.$$
+                                if [[ $jar_name == *zip ]] || [[ $jar_name == *jar ]]; then
+                                     unzip -q $jar_name -d $extract_dir
 
 				# Debug image tarballs vary in top-level folders between Vendors, eg.location of bin folder
 				#     temurin: jdk-21.0.5+11-debug-image/jdk-21.0.5+11/bin
 				#     semeru:  jdk-21.0.4+7-debug-image/bin
 
 				# Unpack into a temp directory, remove 1 or maybe 2 top-level single folders, then copy over extract_dir
-				mkdir dir.$$ && cd dir.$$
-				if [[ $file_name == *zip ]] || [[ $file_name == *jar ]]; then
-					unzip -q ../$file_name
+				#mkdir dir.$$ && cd dir.$$
+				#if [[ $jar_name == *zip ]] || [[ $jar_name == *jar ]]; then
+					#unzip -q ../$jar_name
 				else
-					$DECOMPRESS_TOOL -cd ../$file_name | tar xof -
+					# some debug-image tar has parent folder ... strip it /usr/bin/tar added for MAC_java80 runs
+					if /usr/bin/tar --version 2>&1 | grep GNU 2>&1; then
+						gzip -cd $jar_name | /usr/bin/tar xof - -C $extract_dir --strip 1
+					else
+						mkdir dir.$$ && cd dir.$$ && gzip -cd ../$jar_name | /usr/bin/tar xof - && cd * && /usr/bin/tar cf - . | (cd ../../$extract_dir && /usr/bin/tar xpf -) && cd ../.. && rm -rf dir.$$
+					fi
 				fi
 
 				# Remove 1 possibly 2 top-level folders (debugimage has 2)
@@ -439,14 +447,14 @@ getBinaryOpenjdk()
 				else
 					mkdir $SDKDIR/jdkbinary/tmp
 				fi
-				echo "Uncompressing file: $file_name ..."
-				if [[ $file_name == *zip ]] || [[ $file_name == *jar ]]; then
-					unzip -q $file_name -d ./tmp
-				elif [[ $file_name == *.pax* ]]; then
+				echo "Uncompressing file: $jar_name ..."
+				if [[ $jar_name == *zip ]] || [[ $jar_name == *jar ]]; then
+					unzip -q $jar_name -d ./tmp
+				elif [[ $jar_name == *.pax* ]]; then
 					cd ./tmp
-					pax -p xam -rzf ../$file_name
+					pax -p xam -rzf ../$jar_name
 				else
-					$DECOMPRESS_TOOL -cd $file_name | (cd tmp && tar xof -)
+					$DECOMPRESS_TOOL -cd $jar_name | (cd tmp && tar xof -)
 				fi
 
 				cd $SDKDIR/jdkbinary/tmp
@@ -523,7 +531,7 @@ checkURL() {
 	local filename="$1"
 	if [[ $filename =~ "test-image" ]]; then
 		required=$TEST_IMAGES_REQUIRED
-	elif [[ $filename =~ "debug-image" ]] || [[ "$file_name" =~ "debugimage" ]]; then
+	elif [[ $filename =~ "debug-image" ]] || [[ "$jar_name" =~ "debugimage" ]]; then
 		required=$DEBUG_IMAGES_REQUIRED
 	fi
 }

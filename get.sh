@@ -454,7 +454,7 @@ getBinaryOpenjdk()
 					cd ./tmp
 					pax -p xam -rzf ../$jar_name
 				else
-					$DECOMPRESS_TOOL -cd $jar_name | (cd tmp && tar xof -)
+					$DECOMPRESS_TOOL -cd $jar_name | (cd tmp && /usr/bin/tar xof -)
 				fi
 
 				cd $SDKDIR/jdkbinary/tmp
@@ -547,7 +547,7 @@ getOpenJDKSources() {
 	if [[ "$sources_file" == *zip ]] || [[ "$sources_file" == *jar ]]; then
 		unzip -q $sources_file -d .
 	else
-		gzip -cd $sources_file | tar xof -
+		gzip -cd $sources_file | /usr/bin/tar xof -
 	fi
 	rm $sources_file
 	folder=`ls -d */`

@@ -789,6 +789,7 @@ public class JavatestUtil {
 				genCmd = genCmd.replace("/", "\\");
 				impCmd = impCmd.replace("/", "\\");
 			} else if (spec.contains("linux") || spec.contains("aix")) {
+				pathToJavac = testJdk + File.separator + "bin" + File.separator + "javac";
 				xjcCmd = jckBase + File.separator + "linux" + File.separator + "bin" + File.separator + "xjc.sh";
 				jxcCmd = jckBase + File.separator + "linux" + File.separator + "bin" + File.separator + "schemagen.sh";
 				genCmd = jckBase + File.separator + "linux" + File.separator + "bin" + File.separator + "wsgen.sh";
@@ -810,7 +811,7 @@ public class JavatestUtil {
 			}
 			
 			// bash/ksh required to run schema scripts (cannot be standard sh)
-			if (spec.contains("linux")) {
+			if (spec.contains("linux") || spec.contains("aix")) {
 				xjcCmd = "bash "+xjcCmd;
 				jxcCmd = "bash "+jxcCmd;
 			} else if (spec.contains("sunos")) {

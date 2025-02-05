@@ -41,6 +41,7 @@ java/lang/annotation/AnnotationsInheritanceOrderRedefinitionTest.java https://gi
 java/lang/annotation/loaderLeak/Main.java https://github.com/eclipse-openj9/openj9/issues/6701 generic-all
 java/lang/annotation/LoaderLeakTest.java https://github.com/eclipse-openj9/openj9/issues/13201 generic-all
 java/lang/Class/GetModuleTest.java https://github.com/adoptium/aqa-tests/issues/1297 generic-all
+java/lang/Class/ProtectionDomainRace.java https://github.com/eclipse-openj9/openj9/issues/20351 generic-all
 java/lang/ClassLoader/Assert.java https://github.com/eclipse-openj9/openj9/issues/6668 macosx-x64
 java/lang/ClassLoader/EndorsedDirs.java https://github.com/eclipse-openj9/openj9/issues/3055 generic-all
 java/lang/ClassLoader/ExtDirs.java https://github.com/eclipse-openj9/openj9/issues/3055 generic-all
@@ -107,6 +108,7 @@ java/lang/StackWalker/VerifyStackTrace.java https://github.com/adoptium/aqa-test
 java/lang/String/CaseConvertSameInstance.java https://github.com/eclipse-openj9/openj9/issues/6672 generic-all
 java/lang/String/CaseInsensitiveComparator.java https://github.com/eclipse-openj9/openj9/issues/6665 generic-all
 java/lang/String/CompactString/IndexOf.java  https://github.com/eclipse-openj9/openj9/issues/6673 generic-all
+java/lang/String/concat/HiddenClassUnloading.java https://github.com/eclipse-openj9/openj9/issues/21016 generic-all
 java/lang/String/EqualsIgnoreCase.java https://github.com/eclipse-openj9/openj9/issues/6666 generic-all
 java/lang/String/UnicodeCasingTest.java https://github.com/eclipse-openj9/openj9/issues/4597 linux-s390x
 java/lang/StringBuffer/HugeCapacity.java https://github.com/adoptium/aqa-tests/issues/1297 generic-all
@@ -128,6 +130,7 @@ java/lang/System/LoggerFinder/modules/UnnamedLoggerForImageTest.java https://git
 java/lang/Thread/SleepSanity.java https://github.com/eclipse-openj9/openj9/issues/17638 windows-all
 java/lang/Thread/ThreadSleepEvent.java https://github.com/eclipse-openj9/openj9/issues/20166 generic-all
 java/lang/Thread/UncaughtExceptions.sh https://github.com/eclipse-openj9/openj9/issues/6690 generic-all
+java/lang/Thread/virtual/CancelTimerWithContention.java https://github.com/eclipse-openj9/openj9/issues/21037 generic-all
 java/lang/Thread/virtual/JfrEvents.java https://github.com/eclipse-openj9/openj9/issues/20166 generic-all
 java/lang/Thread/virtual/MiscMonitorTests.java#default https://github.com/eclipse-openj9/openj9/issues/20705 generic-all
 java/lang/Thread/virtual/MiscMonitorTests.java#Xcomp https://github.com/eclipse-openj9/openj9/issues/20705 generic-all
@@ -147,6 +150,7 @@ java/lang/Thread/virtual/MonitorWaitNotify.java#Xint-LM_LEGACY https://github.co
 java/lang/Thread/virtual/MonitorWaitNotify.java#Xint-LM_LIGHTWEIGHT https://github.com/eclipse-openj9/openj9/issues/20369 generic-all
 java/lang/Thread/virtual/RetryMonitorEnterWhenPinned.java https://github.com/eclipse-openj9/openj9/issues/20955 generic-all
 java/lang/Thread/virtual/StackTraces.java https://github.com/eclipse-openj9/openj9/issues/16045 generic-all
+java/lang/Thread/virtual/Starvation.java https://github.com/eclipse-openj9/openj9/issues/21036 generic-all
 java/lang/Thread/virtual/stress/GetStackTraceALotWhenPinned.java#id0 https://github.com/eclipse-openj9/openj9/issues/18908 linux-s390x
 java/lang/Thread/virtual/stress/LotsOfContendedMonitorEnter.java#default https://github.com/eclipse-openj9/openj9/issues/20705 generic-all
 java/lang/Thread/virtual/stress/LotsOfContendedMonitorEnter.java#LM_LIGHTWEIGHT https://github.com/eclipse-openj9/openj9/issues/20705 generic-all
@@ -395,6 +399,7 @@ java/rmi/server/Unreferenced/leaseCheckInterval/LeaseCheckInterval.java https://
 java/security/KeyPairGenerator/FinalizeHalf.java    https://github.com/eclipse-openj9/openj9/issues/12807   windows-all
 java/security/SecureRandom/ApiTest.java https://github.com/eclipse-openj9/openj9/issues/16734 windows-all
 java/security/SecureRandom/EnoughSeedTest.java https://github.com/eclipse-openj9/openj9/issues/16734 windows-all
+java/security/Security/ConfigFileTest.java https://github.com/eclipse-openj9/openj9/issues/20357 generic-all
 java/security/Signature/ResetAfterException.java    https://github.com/eclipse-openj9/openj9/issues/12807   windows-all
 java/security/Signature/SignatureLength.java    https://github.com/eclipse-openj9/openj9/issues/12807   windows-all
 
@@ -534,6 +539,8 @@ vm/verifier/VerifyProtectedConstructor.java https://github.com/eclipse-openj9/op
 
 # jdk_foreign
 
+java/foreign/critical/TestCritical.java https://github.com/eclipse-openj9/openj9/issues/21018 generic-all
+java/foreign/passheapsegment/TestPassHeapSegment.java https://github.com/eclipse-openj9/openj9/issues/21019 generic-all
 java/foreign/stackwalk/TestAsyncStackWalk.java#default_gc https://github.com/eclipse-openj9/openj9/issues/13993 generic-all
 java/foreign/stackwalk/TestAsyncStackWalk.java#shenandoah https://github.com/eclipse-openj9/openj9/issues/13993 generic-all
 java/foreign/stackwalk/TestAsyncStackWalk.java#zgc https://github.com/eclipse-openj9/openj9/issues/13993 generic-all
@@ -543,6 +550,7 @@ java/foreign/stackwalk/TestStackWalk.java#shenandoah https://github.com/eclipse-
 java/foreign/stackwalk/TestStackWalk.java#zgc https://github.com/eclipse-openj9/openj9/issues/13993 generic-all
 java/foreign/upcalldeopt/TestUpcallDeopt.java https://github.com/eclipse-openj9/openj9/issues/13157 generic-all
 java/foreign/TestIllegalLink.java https://github.com/eclipse-openj9/openj9/issues/14002 generic-all
+java/foreign/TestLinker.java https://github.com/eclipse-openj9/openj9/issues/21017 generic-all
 java/foreign/TestUnsupportedPlatform.java https://github.com/eclipse-openj9/openj9/issues/14828 generic-all
 java/foreign/valist/VaListTest.java https://github.com/adoptium/aqa-tests/issues/1297 generic-all
 

@@ -676,7 +676,7 @@ public class JavatestUtil {
 				}
 			}
 			if ( tests.equals("api/java_lang") || tests.contains("api/java_lang/instrument") || tests.equals("api") ) {
-				fileContent += "set jck.env.runtime.jplis.jplisLivePhase Yes;\n";
+				fileContent += "set jck.env.runtime.jplis.jplisLivePhase No;\n";
 			}
 
 			// Get any additional jvm options for specific tests.

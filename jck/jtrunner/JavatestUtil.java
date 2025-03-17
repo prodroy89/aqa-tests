@@ -547,7 +547,7 @@ public class JavatestUtil {
 				else {
 					if ( !spec.contains("win") ) {
 						fileContent += "set jck.env.testPlatform.headless Yes" + ";\n";
-						fileContent += "set jck.env.testPlatform.xWindows Yes" + ";\n";
+						fileContent += "set jck.env.testPlatform.xWindows No" + ";\n";
 						if ( !spec.contains("osx") ) { 
 							String display = System.getenv("DISPLAY");
 							if ( display == null ) {

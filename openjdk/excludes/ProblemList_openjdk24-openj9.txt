@@ -433,6 +433,8 @@ sun/security/rsa/pss/SignatureTestPSS.java	https://github.ibm.com/runtimes/backl
 sun/security/ssl/CipherSuite/DisabledCurve.java	https://github.ibm.com/runtimes/backlog/issues/795	aix-all,windows-all
 sun/security/ssl/CipherSuite/NamedGroupsWithCipherSuite.java	https://github.ibm.com/runtimes/backlog/issues/795	aix-all,windows-all
 sun/security/ssl/CipherSuite/SupportedGroups.java	https://github.ibm.com/runtimes/backlog/issues/795	aix-all,windows-all
+sun/security/ssl/X509TrustManagerImpl/distrust/Camerfirma.java https://github.com/eclipse-openj9/openj9/issues/21235 generic-all
+sun/security/ssl/X509TrustManagerImpl/distrust/Entrust.java https://github.com/adoptium/aqa-tests/issues/3976 generic-all
 sun/security/ssl/X509TrustManagerImpl/distrust/Symantec.java	https://github.com/eclipse-openj9/openj9/issues/16312	generic-all
 sun/security/ssl/X509TrustManagerImpl/Symantec/Distrust.java	https://github.com/adoptium/aqa-tests/issues/2123	generic-all
 sun/security/tools/jarsigner/PreserveRawManifestEntryAndDigest.java	https://github.ibm.com/runtimes/backlog/issues/795	aix-all
@@ -536,8 +538,6 @@ vm/verifier/VerifyProtectedConstructor.java https://github.com/eclipse-openj9/op
 
 # jdk_foreign
 
-java/foreign/critical/TestCritical.java https://github.com/eclipse-openj9/openj9/issues/21018 generic-all
-java/foreign/passheapsegment/TestPassHeapSegment.java https://github.com/eclipse-openj9/openj9/issues/21019 generic-all
 java/foreign/stackwalk/TestAsyncStackWalk.java#default_gc https://github.com/eclipse-openj9/openj9/issues/13993 generic-all
 java/foreign/stackwalk/TestAsyncStackWalk.java#shenandoah https://github.com/eclipse-openj9/openj9/issues/13993 generic-all
 java/foreign/stackwalk/TestAsyncStackWalk.java#zgc https://github.com/eclipse-openj9/openj9/issues/13993 generic-all

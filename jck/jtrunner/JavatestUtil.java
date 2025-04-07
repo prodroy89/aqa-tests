@@ -80,6 +80,7 @@ public class JavatestUtil {
 	private static String testHost2Name;
 	private static String testHost2Ip;
 	private static String httpUrl;
+	private static String ftpUrl;
 	private static String krb5ClientPassword;
 	private static String krb5ClientUsername;
 	private static String krb5ServerPassword;
@@ -355,6 +356,7 @@ public class JavatestUtil {
 			testHost2Name = prop.getProperty("testhost2name");
 			testHost2Ip = prop.getProperty("testhost2ip");
 			httpUrl = prop.getProperty("httpurl");
+			httpUrl = prop.getProperty("ftpurl");
 			// Make sure username properties do not have trailing whitespace before adding server location data.
 			krb5ClientPassword = prop.getProperty("krb5ClientPassword");
 			krb5ClientUsername = prop.getProperty("krb5ClientUsername");
@@ -638,6 +640,7 @@ public class JavatestUtil {
 			
 			if ( tests.contains("api/java_net") || tests.equals("api") ) {
 				fileContent += "set jck.env.runtime.url.httpURL " + httpUrl + ";\n";
+				fileContent += "set jck.env.runtime.url.ftpURL " + ftpUrl + ";\n";
 				fileContent += "set jck.env.runtime.url.fileURL " + fileUrl + ";\n";
 			}
 			

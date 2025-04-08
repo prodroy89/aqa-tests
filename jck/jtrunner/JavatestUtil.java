@@ -356,7 +356,7 @@ public class JavatestUtil {
 			testHost2Name = prop.getProperty("testhost2name");
 			testHost2Ip = prop.getProperty("testhost2ip");
 			httpUrl = prop.getProperty("httpurl");
-			httpUrl = prop.getProperty("ftpurl");
+			ftpUrl = prop.getProperty("ftpurl");
 			// Make sure username properties do not have trailing whitespace before adding server location data.
 			krb5ClientPassword = prop.getProperty("krb5ClientPassword");
 			krb5ClientUsername = prop.getProperty("krb5ClientUsername");

@@ -776,7 +776,7 @@ def runTest( ) {
 				// TODO: once proper label is added on the machine, NODE_NAME check should be removed.
 				if (LABEL.contains("sw.os.rhel.10") || "${NODE_NAME}".toLowerCase().contains("rhel10")) {
 					sh "weston --no-config --socket=wayland-vfb --backend=headless-backend.so --xwayland &"
-					env.DISPLAY = "rtsvc-ubu22x86-hur-1.hursley.ibm.com:1"
+					env.DISPLAY = "ubu22x86-rtp-vnc-rt1-1.fyre.ibm.com:1"
 
 					echo "env.DISPLAY is ${env.DISPLAY}"
 					makeTest("${RUNTEST_CMD}")

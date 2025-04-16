@@ -51,8 +51,10 @@ public class JavatestUtil {
 	private static String testExecutionType;
 	private static String withAgent;
 	private static String interactive;
+        private static String robot;
 	private static String extraJvmOptions = "";
 	private static String concurrencyString;
+        private static String timeoutFactorString;
 	private static String jckVersion;
 	private static String config;
 	private static String configAltPath;
@@ -112,8 +114,10 @@ public class JavatestUtil {
 	private static final String TEST_EXECUTION_TYPE = "testExecutionType";
 	private static final String WITH_AGENT = "withAgent";
 	private static final String INTERACTIVE = "interactive";
+        private static final String ROBOT = "robot";
 	private static final String CONFIG = "config";
 	private static final String CONCURRENCY = "concurrency";
+        private static final String TIMEOUT_FACTOR = "timeoutFactor";
 	private static final String CONFIG_ALT_PATH = "configAltPath";
 	private static final String TASK = "task";
 	private static final String TASK_CMD_FILE_GENERATION = "cmdfilegen";
@@ -136,8 +140,10 @@ public class JavatestUtil {
 		essentialParameters.add(TEST_EXECUTION_TYPE);
 		essentialParameters.add(WITH_AGENT);
 		essentialParameters.add(INTERACTIVE);
+		essentialParameters.add(ROBOT);
 		essentialParameters.add(CONFIG);
 		essentialParameters.add(CONCURRENCY);
+                essentialParameters.add(TIMEOUT_FACTOR);
 		essentialParameters.add(CONFIG_ALT_PATH);
 		essentialParameters.add(TASK);
 		essentialParameters.add(AGENT_HOST);
@@ -208,7 +214,9 @@ public class JavatestUtil {
 		testExecutionType = testArgs.get(TEST_EXECUTION_TYPE) == null ? "default" : testArgs.get(TEST_EXECUTION_TYPE);
 		withAgent = testArgs.get(WITH_AGENT) == null ? "off" : testArgs.get(WITH_AGENT);
 		interactive = testArgs.get(INTERACTIVE) == null ? "no" : testArgs.get(INTERACTIVE);
+                robot = testArgs.get(ROBOT) == null ? "no" : testArgs.get(ROBOT);
 		concurrencyString = testArgs.get("concurrency") == null ? "NULL" : testArgs.get("concurrency");
+                timeoutFactorString = testArgs.get(TIMEOUT_FACTOR) == null ? "NULL" : testArgs.get(TIMEOUT_FACTOR);
 		config = testArgs.get(CONFIG) == null ? "NULL" : testArgs.get(CONFIG);
 		configAltPath = testArgs.get(CONFIG_ALT_PATH) == null ? "NULL" : testArgs.get(CONFIG_ALT_PATH);
 		agentHost = testArgs.get(AGENT_HOST) == null ? "localhost" : testArgs.get(AGENT_HOST).trim();
@@ -479,7 +487,8 @@ public class JavatestUtil {
 			if ( interactive.equals("yes")) {
 				keyword = "keywords interactive";
 			}
-			else { 
+			else if ( !tests.contains("api/java_awt/interactive") ) {
+				// Filter interactives as long as not running a specific interactive custom list that may include interactives/robots
 				keyword = "keywords !interactive";
 			}
 
@@ -511,11 +520,26 @@ public class JavatestUtil {
 			}
 			
 			if ( tests.contains("api/java_awt") || tests.contains("api/javax_swing") || tests.equals("api") ) {
-				keyword += "&!robot";
+				if ( robot.equals("yes") ) {
+					keyword += (keyword.equals("")) ? "keywords robot" : "&robot";
+				} else if ( !tests.contains("api/java_awt/interactive") ) {
+					// Filter robot as long as not running a specific interactive custom list that may include robots
+					keyword += (keyword.equals("")) ? "keywords !robot" : "&!robot";
+				}
+			}
+
+			if ( keyword.equals("") ) {
+				// No specific keyword, so default to runtime
+				keyword = "keywords runtime";
 			}
 			
 			fileContent += "concurrency " + concurrencyString + ";\n";
-			fileContent += "timeoutfactor 4" + ";\n";	// 4 base time limit equal 40 minutes
+                       
+                        if (!timeoutFactorString.equals("NULL")) {
+				fileContent += "timeoutfactor " + timeoutFactorString + ";\n";
+                        } else {
+				fileContent += "timeoutfactor 4" + ";\n";	// 4 base time limit equal 40 minutes
+			}
 			fileContent += keyword + ";\n";
 
 			if (spec.contains("win")) {
@@ -534,6 +558,8 @@ public class JavatestUtil {
 			if ( testsRequireDisplay(tests) ) {
 				if (spec.contains("zos") || spec.contains("alpine-linux") || spec.contains("riscv")) {
 					fileContent += "set jck.env.testPlatform.headless Yes" + ";\n";
+                                        // Ensure JVM graphical device and system are headless, regardless of environment DISPLAY
+                                        jvmOpts +=  "-Djava.awt.headless=true ";
 				}
 				else {
 					if ( !spec.contains("win") ) {
@@ -676,7 +702,11 @@ public class JavatestUtil {
 			
 
 			if (jckVersionInt > 11) {
-				extraJvmOptions += " --enable-preview -Xfuture ";
+				if (jckVersionInt > 23) {
+					extraJvmOptions += " --enable-preview -Xverify:all ";
+				} else {
+					extraJvmOptions += " --enable-preview -Xfuture ";
+				}
 			}
 
 			// Add the JVM options supplied by the user plus those added in this method to the jtb file option.
@@ -698,7 +728,11 @@ public class JavatestUtil {
 			} 
 
 			fileContent += "concurrency " + concurrencyString + ";\n";
-			fileContent += "timeoutfactor 100" + ";\n";							// lang.CLSS,CONV,STMT,INFR requires more than 1h to complete. lang.Annot,EXPR,LMBD require more than 2h to complete tests
+                        if (!timeoutFactorString.equals("NULL")) {
+                                fileContent += "timeoutfactor " + timeoutFactorString + ";\n";
+                        } else {
+				fileContent += "timeoutfactor 100" + ";\n";							// lang.CLSS,CONV,STMT,INFR requires more than 1h to complete. lang.Annot,EXPR,LMBD require more than 2h to complete tests
+			}
 			fileContent += keyword + ";\n";
 			
 			if (testExecutionType.equals("multijvm")) { 
@@ -759,7 +793,11 @@ public class JavatestUtil {
 			
 
 			if (jckVersionInt > 11) {
-				extraJvmOptions += " --enable-preview -Xfuture ";
+				if (jckVersionInt > 23) {
+					extraJvmOptions += " --enable-preview -Xverify:all ";
+				} else {
+					extraJvmOptions += " --enable-preview -Xfuture ";
+				}
 			}
 			
 			// Add the JVM options supplied by the user plus those added in this method to the jtb file option.
@@ -819,7 +857,11 @@ public class JavatestUtil {
 			}
 
 			fileContent += "concurrency " + concurrencyString + ";\n";
-			fileContent += "timeoutfactor 40" + ";\n";							// All Devtools tests take less than 1h to finish.
+                        if (!timeoutFactorString.equals("NULL")) {
+                                fileContent += "timeoutfactor " + timeoutFactorString + ";\n";
+                        } else {
+				fileContent += "timeoutfactor 40" + ";\n";							// All Devtools tests take less than 1h to finish.
+			}
 
 			if (spec.contains("win")) {
 				// On Windows set the testplatform.os to Windows and set systemRoot, but do not

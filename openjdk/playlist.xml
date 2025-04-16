@@ -40,18 +40,13 @@
 				<impl>openj9</impl>
 			</disable>
 		</disables>
-		<variations>
-			<variation>Mode150</variation>
-			<variation>Mode650</variation>
-			<variation>Mode1000</variation>
-		</variations>
 		<command>$(JAVA_COMMAND) -Xmx512m -jar $(Q)$(TEST_RESROOT)$(D)jtreg$(D)lib$(D)jtreg.jar$(Q) \
 	$(JTREG_BASIC_OPTIONS) $(JDK_NATIVE_OPTIONS) -vmoptions:$(Q)-Xmx512m $(JVM_OPTIONS) $(VMOPTION_HEADLESS)$(Q) \
 	$(TIMEOUT_HANDLER) \
 	-w $(Q)$(REPORTDIR)$(D)work$(Q) \
 	-r $(Q)$(REPORTDIR)$(D)report$(Q) \
 	-jdk:$(Q)$(TEST_JDK_HOME)$(Q) \
-	$(Q)$(JTREG_LANGTOOLS_TEST_DIR)$(D)$(LANGTOOLS_CUSTOM_TARGET)$(Q); \
+	$(FULLPATH_LANGTOOLS_CUSTOM_TARGET); \
 	$(TEST_STATUS)</command>
 		<levels>
 			<level>special</level>
@@ -93,6 +88,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 		<impls>
 			<impl>openj9</impl>
@@ -111,11 +107,6 @@
 				<impl>ibm</impl>
 			</disable>
 		</disables>
-		<variations>
-			<variation>Mode150</variation>
-			<variation>Mode650</variation>
-			<variation>Mode1000</variation>
-		</variations>
 		<command>$(JAVA_COMMAND) -Xmx512m -jar $(Q)$(TEST_RESROOT)$(D)jtreg$(D)lib$(D)jtreg.jar$(Q) \
 	$(JTREG_BASIC_OPTIONS) $(JVM_NATIVE_OPTIONS) -vmoptions:$(Q)-Xmx512m $(JVM_OPTIONS) $(VMOPTION_HEADLESS)$(Q) \
 	$(TIMEOUT_HANDLER) \
@@ -133,11 +124,6 @@
 	</test>
 	<test>
 		<testCaseName>hotspot_custom_j9</testCaseName>
-		<variations>
-			<variation>Mode150</variation>
-			<variation>Mode650</variation>
-			<variation>Mode1000</variation>
-		</variations>
 		<command>$(JAVA_COMMAND) -Xmx512m -jar $(Q)$(TEST_RESROOT)$(D)jtreg$(D)lib$(D)jtreg.jar$(Q) \
 	$(JTREG_BASIC_OPTIONS) -nativepath:"$(TESTIMAGE_PATH)/hotspot/jtreg/native" -vmoptions:$(Q)-Xmx512m $(JVM_OPTIONS) $(VMOPTION_HEADLESS)$(Q) \
 	$(TIMEOUT_HANDLER) \
@@ -252,6 +238,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 		<platformRequirementsList>
 			<platformRequirements>os.linux</platformRequirements>
@@ -287,6 +274,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 		<platformRequirements>os.linux</platformRequirements>
 	</test>
@@ -567,6 +555,46 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
+		</features>
+		<impls>
+			<impl>openj9</impl>
+			<impl>ibm</impl>
+		</impls>
+	</test>
+	<test>
+		<testCaseName>serviceability_jdwp_j9</testCaseName>
+		<variations>
+			<variation>Mode150</variation>
+			<variation>Mode650</variation>
+			<variation>Mode1000</variation>
+		</variations>
+		<command> $(JAVA_COMMAND) -Xmx512m -jar $(Q)$(TEST_RESROOT)$(D)jtreg$(D)lib$(D)jtreg.jar$(Q) \
+		$(JTREG_BASIC_OPTIONS) -nativepath:"$(TESTIMAGE_PATH)/hotspot/jtreg/native" -vmoptions:$(Q)-Xmx512m $(JVM_OPTIONS) $(VMOPTION_HEADLESS)$(Q) \
+		$(TIMEOUT_HANDLER) \
+		-w $(Q)$(REPORTDIR)$(D)work$(Q) \
+		-r $(Q)$(TEST_RESROOT)$(D)report$(Q) \
+		-jdk:$(Q)$(TEST_JDK_HOME)$(Q) \
+		-exclude:$(Q)$(JTREG_HOTSPOT_TEST_DIR)$(D)ProblemList.txt$(Q) \
+		-exclude:$(Q)$(TEST_RESROOT)$(D)$(PROBLEM_LIST_FILE)$(Q) \
+		${FEATURE_PROBLEM_LIST_FILE} \
+		${VENDOR_PROBLEM_LIST_FILE} \
+		$(Q)$(JTREG_HOTSPOT_TEST_DIR)/serviceability/jdwp$(Q); \
+		$(TEST_STATUS)</command>
+		<versions>
+			<version>11+</version>
+		</versions>
+		<levels>
+			<level>extended</level>
+		</levels>
+		<groups>
+			<group>openjdk</group>
+		</groups>
+		<features>
+			<feature>FIPS140_2:nonapplicable</feature>
+			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
+			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 		<impls>
 			<impl>openj9</impl>
@@ -605,6 +633,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 		<impls>
 			<impl>openj9</impl>
@@ -650,6 +679,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -677,11 +707,6 @@
 	</test>
 	<test>
 		<testCaseName>hotspot_jdk</testCaseName>
-		<variations>
-			<variation>Mode150</variation>
-			<variation>Mode650</variation>
-			<variation>Mode1000</variation>
-		</variations>
 		<command>$(JAVA_COMMAND) -Xmx512m -jar $(Q)$(TEST_RESROOT)$(D)jtreg$(D)lib$(D)jtreg.jar$(Q) \
 	$(JTREG_BASIC_OPTIONS) $(JVM_NATIVE_OPTIONS) -vmoptions:$(Q)-Xmx512m $(JVM_OPTIONS) $(VMOPTION_HEADLESS)$(Q) \
 	-w $(Q)$(REPORTDIR)$(D)work$(Q) \
@@ -749,6 +774,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -757,7 +783,13 @@
 			<disable>
 				<comment>https://github.com/eclipse-openj9/openj9/issues/20531</comment>
 				<impl>openj9</impl>
-				<platform>^((?!(x86-64_linux)).)*$</platform>
+				<platform>^(?!.*linux|aarch64_mac).*$</platform>
+			</disable>
+			<disable>
+				<comment>https://github.com/eclipse-openj9/openj9/issues/20531</comment>
+				<impl>openj9</impl>
+				<platform>aarch64_mac.*</platform>
+				<version>[8, 11]</version>
 			</disable>
 			<disable>
 				<comment>https://github.com/eclipse-openj9/openj9/issues/10757</comment>
@@ -790,6 +822,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -821,6 +854,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -852,12 +886,14 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
 		<testCaseName>jdk_lang_j9</testCaseName>
 		<variations>
 			<variation>$(TEST_VARIATION_DUMP) $(TEST_VARIATION_JIT_PREVIEW) Mode501</variation>
+			<variation>$(TEST_VARIATION_DUMP) $(TEST_VARIATION_JIT_PREVIEW) Mode501 -XXgc:fvtest_forceCopyForwardHybridMarkCompactRatio=10</variation>
 		</variations>
 		<command>$(JAVA_COMMAND) -Xmx768m -jar $(Q)$(TEST_RESROOT)$(D)jtreg$(D)lib$(D)jtreg.jar$(Q) \
 	$(JTREG_BASIC_OPTIONS) $(JDK_NATIVE_OPTIONS) -vmoptions:$(Q)-Xmx512m $(JVM_OPTIONS) $(VMOPTION_HEADLESS)$(Q) \
@@ -881,6 +917,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 		<impls>
 			<impl>openj9</impl>
@@ -918,6 +955,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -951,6 +989,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 		<platformRequirements>os.win,bits.64</platformRequirements>
 	</test>
@@ -987,6 +1026,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 		<impls>
 			<impl>openj9</impl>
@@ -1022,6 +1062,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 		<impls>
 			<impl>openj9</impl>
@@ -1056,6 +1097,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 		<impls>
 			<impl>openj9</impl>
@@ -1091,6 +1133,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -1128,6 +1171,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -1219,6 +1263,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -1258,6 +1303,11 @@
 		<testCaseName>jdk_security2</testCaseName>
 		<disables>
 			<disable>
+				<comment>https://github.com/eclipse-openj9/openj9/issues/19962</comment>
+				<impl>openj9</impl>
+				<platform>.*aix.*</platform>
+			</disable>
+			<disable>
 				<comment>https://github.ibm.com/runtimes/backlog/issues/1089</comment>
 				<impl>openj9</impl>
 				<testflag>fips140_2</testflag>
@@ -1286,6 +1336,43 @@
 		<groups>
 			<group>openjdk</group>
 		</groups>
+	</test>
+	<test>
+		<testCaseName>jdk_security2_extended</testCaseName>
+		<disables>
+			<disable>
+				<comment>https://github.ibm.com/runtimes/backlog/issues/1089</comment>
+				<impl>openj9</impl>
+				<testflag>fips140_2</testflag>
+			</disable>
+		</disables>
+		<variations>
+			<variation>Mode150</variation>
+			<variation>Mode650</variation>
+			<variation>Mode1000</variation>
+		</variations>
+		<command>$(JAVA_COMMAND) -Xmx512m -jar $(Q)$(TEST_RESROOT)$(D)jtreg$(D)lib$(D)jtreg.jar$(Q) \
+	$(JTREG_BASIC_OPTIONS) $(JDK_NATIVE_OPTIONS) -vmoptions:$(Q)-Xmx512m $(JVM_OPTIONS) $(VMOPTION_HEADLESS)$(Q) \
+	$(TIMEOUT_HANDLER) \
+	-w $(Q)$(REPORTDIR)$(D)work$(Q) \
+	-r $(Q)$(REPORTDIR)$(D)report$(Q) \
+	-jdk:$(Q)$(TEST_JDK_HOME)$(Q) \
+	-exclude:$(Q)$(JTREG_JDK_TEST_DIR)$(D)ProblemList.txt$(Q) \
+	-exclude:$(Q)$(TEST_RESROOT)$(D)$(PROBLEM_LIST_FILE)$(Q) \
+	${FEATURE_PROBLEM_LIST_FILE} \
+	${VENDOR_PROBLEM_LIST_FILE} \
+	$(Q)$(JTREG_JDK_TEST_DIR):jdk_security2$(Q); \
+	$(TEST_STATUS)</command>
+		<levels>
+			<level>extended</level>
+		</levels>
+		<groups>
+			<group>openjdk</group>
+		</groups>
+		<platformRequirements>os.aix</platformRequirements>
+		<impls>
+			<impl>openj9</impl>
+		</impls>
 	</test>
 	<test>
 		<testCaseName>jdk_security3</testCaseName>
@@ -1396,6 +1483,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 		<impls>
 			<impl>ibm</impl>
@@ -1435,6 +1523,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -1471,6 +1560,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -1502,6 +1592,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -1533,6 +1624,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -1540,6 +1632,7 @@
 		<disables>
 			<disable>
 				<comment>https://github.com/eclipse-openj9/openj9/issues/10757</comment>
+				<platform>^((?!(x86-64_linux)).)*$</platform>
 				<impl>openj9</impl>
 			</disable>
 			<disable>
@@ -1574,6 +1667,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -1615,6 +1709,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -1651,7 +1746,34 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
+	</test>
+	<test>
+		<testCaseName>jdk_restricted_security</testCaseName>
+		<command>$(JAVA_COMMAND) -Xmx512m -jar $(Q)$(TEST_RESROOT)$(D)jtreg$(D)lib$(D)jtreg.jar$(Q) \
+	$(JTREG_BASIC_OPTIONS) $(JDK_NATIVE_OPTIONS) -vmoptions:$(Q)-Xmx512m $(JVM_OPTIONS) $(VMOPTION_HEADLESS)$(Q) \
+	$(TIMEOUT_HANDLER) \
+	-w $(Q)$(REPORTDIR)$(D)work$(Q) \
+	-r $(Q)$(REPORTDIR)$(D)report$(Q) \
+	-jdk:$(Q)$(TEST_JDK_HOME)$(Q) \
+	$(Q)$(OPENJDK_DIR)$(D)closed$(D)test$(D)jdk$(D)openj9$(D)internal$(D)security$(Q); \
+	$(TEST_STATUS)</command>
+		<features>
+			<feature>FIPS140_2:nonapplicable</feature>
+			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
+			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
+		</features>
+		<levels>
+			<level>special</level>
+		</levels>
+		<groups>
+			<group>openjdk</group>
+		</groups>
+		<impls>
+			<impl>openj9</impl>
+		</impls>
 	</test>
 	<test>
 		<testCaseName>jdk_rmi</testCaseName>
@@ -1683,6 +1805,11 @@
 		<testCaseName>jdk_tools</testCaseName>
 		<disables>
 			<disable>
+				<comment>https://bugs.openjdk.org/browse/JDK-8345185</comment>
+				<impl>hotspot</impl>
+				<version>24</version>
+			</disable>
+			<disable>
 				<comment>https://github.com/eclipse-openj9/openj9/issues/10757</comment>
 				<impl>openj9</impl>
 			</disable>
@@ -1691,8 +1818,10 @@
 				<impl>ibm</impl>
 			</disable>
 			<disable>
-				<comment>https://github.com/adoptium/aqa-tests/issues/3232#issuecomment-1032587426</comment>
+				<comment>https://bugs.openjdk.org/browse/JDK-8324306</comment>
 				<platform>x86-64_alpine-linux|aarch64_alpine-linux</platform>
+				<version>17</version>
+				<impl>hotspot</impl>
 			</disable>
 		</disables>
 		<variations>
@@ -1722,6 +1851,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -1752,6 +1882,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 		<impls>
 			<impl>openj9</impl>
@@ -1799,6 +1930,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -1806,7 +1938,7 @@
 		<disables>
 			<disable>
 				<comment>https://github.com/adoptium/aqa-tests/issues/3115#issuecomment-2256561374</comment>
-				<vendor>eclipse</vendor>
+				<vendor>temurin</vendor>
 				<platform>arm_linux</platform>
 				<version>8</version>
 			</disable>
@@ -1825,7 +1957,7 @@
 			<variation>Mode1000</variation>
 		</variations>
 		<command>$(JAVA_COMMAND) -Xmx512m -jar $(Q)$(TEST_RESROOT)$(D)jtreg$(D)lib$(D)jtreg.jar$(Q) \
-	$(JTREG_BASIC_OPTIONS) $(JDK_NATIVE_OPTIONS) -vmoptions:$(Q)-Xmx512m $(JVM_OPTIONS) $(VMOPTION_HEADLESS)$(Q) \
+	$(JTREG_BASIC_OPTIONS) $(JDK_NATIVE_OPTIONS) -vmoptions:$(Q)-Xmx768m $(JVM_OPTIONS) $(VMOPTION_HEADLESS)$(Q) \
 	-w $(Q)$(REPORTDIR)$(D)work$(Q) \
 	-r $(Q)$(REPORTDIR)$(D)report$(Q) \
 	-jdk:$(Q)$(TEST_JDK_HOME)$(Q) \
@@ -1877,6 +2009,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -1922,6 +2055,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<!-- From jdk11 jdk_jdi is part of jdk_svc_sanity -->
@@ -1976,6 +2110,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -2019,11 +2154,12 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<!-- ClassesByName2Test is a subtest of jdk_jdi. Once jdk_jdi is fully enabled in openj9/ibm, the classesByName2Test below can be removed  -->
 	<test>
-		<testCaseName>classesByName2Test</testCaseName>
+		<testCaseName>jdk_classesByName2Test</testCaseName>
 		<variations>
 			<variation>Mode150</variation>
 			<variation>Mode650</variation>
@@ -2057,6 +2193,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<!-- JdwpAttachTest is a subtest of jdk_jdi. Once jdk_jdi is fully enabled in openj9/ibm, the JdwpAttachTest below can be removed  -->
@@ -2095,6 +2232,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -2139,6 +2277,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -2180,6 +2319,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -2227,6 +2367,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -2295,6 +2436,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 
@@ -2330,6 +2472,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -2377,6 +2520,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -2423,6 +2567,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -2457,6 +2602,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -2491,6 +2637,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -2525,6 +2672,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -2571,6 +2719,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 	<test>
@@ -2601,6 +2750,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 		<impls>
 			<impl>openj9</impl>
@@ -2635,6 +2785,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 		<impls>
 			<impl>openj9</impl>
@@ -2669,6 +2820,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 		<impls>
 			<impl>openj9</impl>
@@ -2703,6 +2855,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 		<impls>
 			<impl>openj9</impl>
@@ -2737,6 +2890,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 		<impls>
 			<impl>openj9</impl>
@@ -2771,6 +2925,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 		<impls>
 			<impl>openj9</impl>
@@ -2805,6 +2960,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 		<impls>
 			<impl>openj9</impl>
@@ -3130,6 +3286,7 @@
 			<feature>FIPS140_2:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS:nonapplicable</feature>
 			<feature>FIPS140_3_OpenJCEPlusFIPS.FIPS140-3:nonapplicable</feature>
+			<feature>OpenJCEPlus:nonapplicable</feature>
 		</features>
 	</test>
 </playlist>

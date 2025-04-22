@@ -62,10 +62,7 @@ ifeq ($(OS),FreeBSD)
 endif
 ifeq ($(CYGWIN),1)
  	NPROCS:=$(NUMBER_OF_PROCESSORS)
-	MEMORY_SIZE:=$(shell \
-		expr `wmic computersystem get totalphysicalmemory -value | grep = \
-		| cut -d "=" -f 2-` / 1024 / 1024 \
-		)
+	MEMORY_SIZE:=$(shell powershell -command "(Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1024 / 1024")
 endif
 ifeq ($(OS),SunOS)	
 	NPROCS:=$(shell psrinfo | wc -l)
@@ -179,6 +176,7 @@ LANGTOOLS_CUSTOM_TARGET ?= tools/javac/4241573/T4241573.java
 FULLPATH_JDK_CUSTOM_TARGET = $(foreach target,$(JDK_CUSTOM_TARGET),$(JTREG_JDK_TEST_DIR)$(D)$(target))
 FULLPATH_HOTSPOT_CUSTOM_TARGET = $(foreach target,$(HOTSPOT_CUSTOM_TARGET),$(JTREG_HOTSPOT_TEST_DIR)$(D)$(target))
 FULLPATH_HOTSPOT_CUSTOM_J9_TARGET = $(foreach target,$(HOTSPOT_CUSTOM_J9_TARGET),$(JTREG_HOTSPOT_TEST_DIR)$(D)$(target))
+FULLPATH_LANGTOOLS_CUSTOM_TARGET = $(foreach target,$(LANGTOOLS_CUSTOM_TARGET),$(JTREG_LANGTOOLS_TEST_DIR)$(D)$(target))
 
 JDK_NATIVE_OPTIONS :=
 JVM_NATIVE_OPTIONS :=
@@ -238,6 +236,8 @@ else ifneq (,$(findstring FIPS140_3_OpenJCEPlusFIPS.FIPS140-3, $(TEST_FLAG)))
 	FEATURE_PROBLEM_LIST_FILE:=-exclude:$(Q)$(JTREG_JDK_TEST_DIR)$(D)ProblemList-FIPS140_3_OpenJCEPlusFIPS.FIPS140-3.txt$(Q)
 else ifneq (,$(findstring FIPS140_3_OpenJCEPlus, $(TEST_FLAG)))
 	FEATURE_PROBLEM_LIST_FILE:=-exclude:$(Q)$(JTREG_JDK_TEST_DIR)$(D)ProblemList-FIPS140_3_OpenJcePlus.txt$(Q)
+else ifneq (,$(findstring OpenJCEPlus, $(TEST_FLAG)))
+	FEATURE_PROBLEM_LIST_FILE:=-exclude:$(Q)$(JTREG_JDK_TEST_DIR)$(D)ProblemList-OpenJCEPlus.txt$(Q)
 endif
 
 VENDOR_PROBLEM_LIST_FILE:=

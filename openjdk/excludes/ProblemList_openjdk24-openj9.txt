@@ -176,8 +176,6 @@ java/lang/Thread/virtual/TracePinnedThreads.java https://github.com/eclipse-open
 java/lang/Thread/virtual/stress/GetStackTraceALotWhenBlocking.java#id0 https://github.com/eclipse-openj9/openj9/issues/21182 generic-all
 java/lang/Thread/virtual/stress/GetStackTraceALotWhenPinned.java#id0 https://github.com/eclipse-openj9/openj9/issues/21182 generic-all
 java/lang/Thread/virtual/stress/GetStackTraceALotWithTimedWait.java#id0 https://github.com/eclipse-openj9/openj9/issues/21445 linux-ppc64le,aix-all
-java/lang/Thread/virtual/stress/LotsOfContendedMonitorEnter.java#default https://github.com/eclipse-openj9/openj9/issues/20705 generic-all
-java/lang/Thread/virtual/stress/LotsOfContendedMonitorEnter.java#LM_LIGHTWEIGHT https://github.com/eclipse-openj9/openj9/issues/20705 generic-all
 java/lang/Thread/virtual/stress/Skynet.java#default https://github.com/eclipse-openj9/openj9/issues/21425 generic-all
 java/lang/Thread/virtual/stress/Skynet100kWithMonitors.java#id0 https://github.com/eclipse-openj9/openj9/issues/20705 generic-all
 java/lang/Thread/virtual/stress/TimedGet.java https://github.com/eclipse-openj9/openj9/issues/15184 macosx-x64
@@ -320,7 +318,6 @@ java/io/FileOutputStream/UnreferencedFOSClosesFd.java https://github.com/eclipse
 java/nio/Buffer/DirectBufferAllocTest.java https://github.com/eclipse-openj9/openj9/issues/4473 generic-all
 java/nio/Buffer/LimitDirectMemory.java https://github.com/eclipse-openj9/openj9/issues/8063 generic-all
 java/nio/Buffer/LimitDirectMemoryNegativeTest.java https://github.com/eclipse-openj9/openj9/issues/8065 generic-all
-java/nio/channels/AsyncCloseAndInterrupt.java https://github.com/adoptium/infrastructure/issues/1173 linux-all,aix-all
 java/nio/channels/AsynchronousChannelGroup/Basic.java https://github.ibm.com/runtimes/backlog/issues/741 generic-all
 java/nio/channels/AsynchronousChannelGroup/GroupOfOne.java https://github.ibm.com/runtimes/backlog/issues/741 generic-all
 java/nio/channels/AsynchronousChannelGroup/Identity.java https://github.ibm.com/runtimes/backlog/issues/741 generic-all
@@ -338,7 +335,7 @@ java/nio/channels/Channels/TransferTo.java https://github.com/eclipse-openj9/ope
 java/nio/channels/DatagramChannel/AdaptorBasic.java https://github.ibm.com/runtimes/backlog/issues/741 generic-all
 java/nio/channels/DatagramChannel/AdaptorMulticasting.java https://github.ibm.com/runtimes/backlog/issues/655 linux-s390x,windows-all,macosx-all
 java/nio/channels/DatagramChannel/AfterDisconnect.java https://github.ibm.com/runtimes/backlog/issues/1594 aix-all
-java/nio/channels/DatagramChannel/BasicMulticastTests.java https://github.ibm.com/runtimes/backlog/issues/1053 macosx-all
+java/nio/channels/DatagramChannel/BasicMulticastTests.java https://github.ibm.com/runtimes/backlog/issues/1622 generic-all
 java/nio/channels/DatagramChannel/ChangingAddress.java https://github.com/adoptium/aqa-tests/issues/1650 aix-all
 java/nio/channels/DatagramChannel/ConnectedSend.java https://github.ibm.com/runtimes/backlog/issues/741 generic-all
 java/nio/channels/DatagramChannel/Disconnect.java https://github.ibm.com/runtimes/backlog/issues/741 generic-all

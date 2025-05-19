@@ -930,6 +930,12 @@ public class JavatestUtil {
 				return false; 
 			}
 		}
+		FileOutputStream jtiFileOut = new FileOutputStream(newJtiFileRef);
+		generatedJti.store(jtiFileOut, newJtiFileRef + " file was generated on " + LocalDateTime.now());
+		// OutputStreamWriter jtiOutSWriter = new OutputStreamWriter(jtiFileOut);
+
+		return (printFileContents(newJtiFileRef) && printFileContents(newJtbFileRef));
+		
 		System.out.println("Echoing contents of generated jtb file : " + newJtbFileRef); 
 		System.out.println(">>>>>>>>>>");
 		BufferedReader br = new BufferedReader (new FileReader(newJtbFileRef)); 

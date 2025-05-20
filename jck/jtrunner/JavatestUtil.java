@@ -948,7 +948,7 @@ public class JavatestUtil {
 		generatedJti.store(jtiFileOut, newJtiFileRef + " file was generated on " + LocalDateTime.now());
 		// OutputStreamWriter jtiOutSWriter = new OutputStreamWriter(jtiFileOut);
 
-		return (printFileContents(newJtiFileRef) && printFileContents(newJtbFileRef));
+		return (printFileContents(newJtiFileRef));
 		
 	}
 

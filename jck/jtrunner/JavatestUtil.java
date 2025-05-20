@@ -924,32 +924,11 @@ public class JavatestUtil {
 		bw.flush();
 		bw.close();
 
-		if (spec.contains("zos")) {
-			if(!doIconvFile()) {
-				System.out.println("Failed to convert jtb file encoding for z/OS");
-				return false; 
-			}
-		}
-		System.out.println("Echoing contents of generated jtb file : " + newJtbFileRef); 
-		System.out.println(">>>>>>>>>>");
-		BufferedReader br = new BufferedReader (new FileReader(newJtbFileRef)); 
-		while(true) {
-			String s = br.readLine(); 
-			if ( s == null) {
-				break; 
-			} else {
-				System.out.println(s); 
-			}
-		}
-		System.out.println("<<<<<<<<");
-		return true;
-		
 		FileOutputStream jtiFileOut = new FileOutputStream(newJtiFileRef);
 		generatedJti.store(jtiFileOut, newJtiFileRef + " file was generated on " + LocalDateTime.now());
 		// OutputStreamWriter jtiOutSWriter = new OutputStreamWriter(jtiFileOut);
+		return (printFileContents(newJtiFileRef) && printFileContents(newJtbFileRef));
 
-		return (printFileContents(newJtiFileRef));
-		
 	}
 
 	private static boolean generateSummary() {

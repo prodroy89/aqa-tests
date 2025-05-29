@@ -29,14 +29,16 @@ ifeq ($(CYGWIN),1)
   # than the cygwin perl port. This assumes that version will be in a directory ending /perl/bin directory
   # and the cygwin version will not. Once found, that version of perl is added ahead of cygwin perl in the PATH.
   $(warning Running under cygwin, looking for Windows perl on path)
-  PERL:=$(shell which -a perl.exe | grep /perl/bin | sort | uniq)
+  PERL:=$(shell which -a perl.exe | grep /usr/bin | sort | uniq)
   ifeq (,$(PERL))
     $(error Unable to find Windows perl e.g. Strawberry perl in a /perl/bin subdirectory on PATH.  Install perl or add to PATH and retry)
   else
     $(warning Found perl in $(PERL))
   endif
   PERL:=$(dir $(PERL))
+  echo $(PERL)
   export PATH:=$(PERL):$(PATH)
+  echo $PATH
 endif
 
 SYSTEMTEST_RESROOT=$(TEST_RESROOT)/../

@@ -244,7 +244,7 @@ def setupParallelEnv() {
 					echo "Regenerate parallel list with NUM_MACHINES=${MAX_NUM_MACHINES}."
 					PARALLEL_OPTIONS = PARALLEL_OPTIONS_TEMP + " NUM_MACHINES=${MAX_NUM_MACHINES} TEST_TIME="
 					NUM_LIST = genParallelList(PARALLEL_OPTIONS)
-				} else if (NUM_LIST < 6 && env.JDK_IMPL == "openj9" && (TARGET == "extended.jck" || TARGET == "special.system")) {
+				} else if (NUM_LIST < 6 && (env.JDK_IMPL == "openj9" || env.JDK_IMPL == "ibm") && (TARGET == "extended.jck" || TARGET == "special.system")) {
 					echo "NUM_LIST value ${NUM_LIST} may not be calculated based on the actual execution time."
 					echo "Regenerate parallel list with NUM_MACHINES=6 for TARGET ${TARGET}."
 					PARALLEL_OPTIONS = PARALLEL_OPTIONS_TEMP + " NUM_MACHINES=6 TEST_TIME="
@@ -733,6 +733,12 @@ def buildTest() {
 def runTest( ) {
 	stage('Test') {
 		echo 'Running tests...'
+
+		if (env.BUILD_LIST.contains('jck') || env.BUILD_LIST.contains('openjdk')) {
+			// Hide other app windows to aid AWT and Arctic automated test execution for jck and openjdk AWT automation tests
+			hideAppWindows()
+		}
+
 		def CUSTOM_OPTION = ''
 
 		TARGET = "${params.TARGET}";
@@ -779,7 +785,9 @@ def runTest( ) {
 					env.DISPLAY = ":0"
 
 					echo "env.DISPLAY is ${env.DISPLAY}"
-					makeTest("${RUNTEST_CMD}")
+					sshagent (credentials: ["$params.SSH_AGENT_CREDENTIAL"], ignoreMissing: true) {
+						makeTest("${RUNTEST_CMD}")
+					}
 				} else {
 					// Add an additional 10 second timeout due to issue: https://github.com/adoptium/temurin-build/issues/2368#issuecomment-756683888
 					wrap([$class: 'Xvfb', autoDisplayName: true, timeout:20]) {
@@ -789,16 +797,17 @@ def runTest( ) {
 						).trim()
 						env.DISPLAY = "${DISPLAY}"
 						echo "env.DISPLAY is ${env.DISPLAY}"
-						makeTest("${RUNTEST_CMD}")
+						sshagent (credentials: ["$params.SSH_AGENT_CREDENTIAL"], ignoreMissing: true) {
+							makeTest("${RUNTEST_CMD}")
+						}
 					}
 				}
-			} else if (BUILD_LIST.contains('external')) {
+			} else if (env.SPEC.startsWith('zos')) { 
+				makeTest("${RUNTEST_CMD}")
+			} else {
 				sshagent (credentials: ["$params.SSH_AGENT_CREDENTIAL"], ignoreMissing: true) {
 					makeTest("${RUNTEST_CMD}")
 				}
-			}
-			else {
-				makeTest("${RUNTEST_CMD}")
 			}
 		}
 
@@ -811,6 +820,10 @@ def runTest( ) {
 				sh "genhtml --quiet codeCoverageInfoFinal.info --output-directory code_coverage_report"
 			}
 		}
+
+                if (env.BUILD_LIST.startsWith('perf')) {
+                    checkDacapoH2Metric()
+                }
 
 		def resultSum = [:]
 		def matcher = manager.getLogMatcher(".*(TOTAL: \\d+)\\s*(EXECUTED: \\d+)\\s*(PASSED: \\d+)\\s*(FAILED: \\d+)\\s*(DISABLED: \\d+)?\\s*(SKIPPED: \\d+)\\s*\$")
@@ -1077,6 +1090,28 @@ def terminateTestProcesses() {
 	}
 }
 
+// For hide app windows to aid AWT and Arctic automated test execution
+def hideAppWindows() {
+        if (params.PLATFORM && params.PLATFORM.contains("mac")) {
+                // Do we have a logged in user console?
+		def consoleRc=sh(script:"who | grep console", returnStatus:true)
+                if (consoleRc == 0) {
+			withEnv(['AWT_FORCE_HEADFUL=true']) {
+   		     		echo "HIDE_APP_WINDOWS: Hiding other app windows on Mac to aid automated AWT test execution"
+	                	def statusCode=sh(script:"cd aqa-tests/buildenv/jenkins/src && ${TEST_JDK_HOME}/bin/javac MinimizeMacWindows.java", returnStatus:true)
+        	        	if (statusCode != 0) {
+                	        	echo "rc = ${statusCode}, Unable to compile aqa-tests/MinimizeMacWindows.java."
+        			} else {
+					statusCode=sh(script:"cd aqa-tests/buildenv/jenkins/src && ${TEST_JDK_HOME}/bin/java -Djava.awt.headless=false MinimizeMacWindows", returnStatus:true)
+	                        	if (statusCode != 0) {
+        	                		echo "rc = ${statusCode}, Unable to hide app windows using aqa-tests/MinimizeMacWindows.java."
+                			}
+				}
+	                }
+		}
+        }
+}
+
 def getJDKImpl(jvm_version) {
 	def jdk_impl = 'hotspot'
 	if (jvm_version.contains('openj9')) {
@@ -1095,10 +1130,12 @@ def addJobDescription() {
 		}
 	}
 	def description = (currentBuild.description) ? currentBuild.description + "<br>" : ""
+	def numMachines = (NUM_MACHINES) ?: 1
 	currentBuild.description = description \
 		+ "TARGET: ${params.TARGET}<br/>" \
 		+ "LABEL: <a href=${JENKINS_URL}label/${LABEL}>${LABEL}</a><br/>" \
-		+ "<a href=${JENKINS_URL}computer/${NODE_NAME}>${NODE_NAME}</a>"
+		+ "<a href=${JENKINS_URL}computer/${NODE_NAME}>${NODE_NAME}</a><br/>" \
+		+ "PARALLEL: ${numMachines}"
 }
 
 def getJenkinsDomain() {
@@ -1632,6 +1669,35 @@ def forceCleanWS() {
 		// call cleanWs() again
 		cleanWs disableDeferredWipeout: true, deleteDirs: true
 	}
+}
+
+def checkDacapoH2Metric() {
+        def regex = ".*=====\\sDaCapo.*?h2\\sPASSED\\sin\\s(\\d*\\.?\\d*)\\smsec\\s=====\\s*\$"
+        def matcher = manager.getLogMatcher(regex)  
+
+        if (matcher?.matches()) {
+                def runtime = matcher.group(1) 
+                archiveDacapoH2Metric(runtime)
+                println("DaCapo-h2 metric found and archived")
+        } else {
+                println("no DaCapo-h2 metric found")
+        }
+}
+
+def archiveDacapoH2Metric(runtime) {
+        def fileName = "${env.JOB_NAME}_${env.BUILD_NUMBER}.log"
+        def jsonData = [
+                "benchmark": "dacapo-h2", 
+                        "metrics": [
+                                "dacapo-h2": [
+                                        ["value": runtime],
+                                        ["higherbetter": true], 
+                                        ["units": "msec"]
+                                ]
+                        ]
+        ]
+        writeJSON file: fileName, json: jsonData
+        archiveArtifacts artifacts: fileName, fingerprint: true, allowEmptyArchive: false
 }
 
 return this

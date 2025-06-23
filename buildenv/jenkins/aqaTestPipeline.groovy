@@ -3,7 +3,7 @@
 import groovy.transform.Field
 
 def JDK_VERSIONS = params.JDK_VERSIONS.trim().split("\\s*,\\s*")
-def PLATFORMS = params.PLATFORMS.trim().split("\\s*,\\s*")
+def PLATFORMS = params.PLATFORMS ? params.PLATFORMS.trim().split("\\s*,\\s*") : ""
 def TARGETS = params.TARGETS ?: "Grinder"
 TARGETS = TARGETS.trim().split("\\s*,\\s*")
 def TEST_FLAG = (params.TEST_FLAG) ?: ""
@@ -129,6 +129,9 @@ def generateJobs(jobJdkVersion, jobTestFlag, jobPlatforms, jobTargets, jobParall
         if (params.VARIANT == "openj9") {
             short_name = "j9"
             jdk_impl = params.VARIANT
+        } else if (params.VARIANT == "ibm") {
+            short_name = "ibm"
+            jdk_impl = params.VARIANT
         }
         def download_url = params.CUSTOMIZED_SDK_URL ? params.CUSTOMIZED_SDK_URL : ""
         def sdk_resource_value = SDK_RESOURCE
@@ -179,7 +182,7 @@ def generateJobs(jobJdkVersion, jobTestFlag, jobPlatforms, jobTargets, jobParall
             def VENDOR_TEST_DIRS = ''
             int rerunIterations = params.RERUN_ITERATIONS ? params.RERUN_ITERATIONS.toInteger() : 0
             def buildList = params.BUILD_LIST ?: ""
-            if (params.VARIANT == "openj9") {
+            if (params.VARIANT == "openj9" || params.VARIANT == "ibm") {
                 // default rerunIterations is 3 for openj9
                 rerunIterations = params.RERUN_ITERATIONS ? params.RERUN_ITERATIONS.toInteger() : 3
                 if (TARGET.contains('external')) {
@@ -213,7 +216,7 @@ def generateJobs(jobJdkVersion, jobTestFlag, jobPlatforms, jobTargets, jobParall
                     }
                 }
 
-                if (jobTestFlag.contains("FIPS") || (TARGET.contains("dev"))) {
+                if (jobTestFlag.contains("FIPS") || jobTestFlag.contains("OpenJCEPlus") || (TARGET.contains("dev"))) {
                     rerunIterations = 0
                 }
             } else if (params.VARIANT == "temurin") {

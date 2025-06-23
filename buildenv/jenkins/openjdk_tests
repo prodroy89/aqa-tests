@@ -107,7 +107,7 @@ def PLATFORM_MAP = [
     'x86-64_linux' : [
         'SPEC' : 'linux_x86-64',
         'LABEL' : 'ci.role.test&&hw.arch.x86&&sw.os.linux',
-        'DynamicAgents' : ['azure', 'fyre']
+        'DynamicAgents' : ['azure', 'fyre', 'EBC']
     ],
     'x86-64_mac' : [
         'SPEC' : 'osx_x86-64',
@@ -125,6 +125,8 @@ if ( !params.TARGET ) {
 def PLATFORMS = params.PLATFORM.trim().split("\\s*,\\s*");
 def JDK_VERSIONS = params.JDK_VERSION.trim().split("\\s*,\\s*");
 def JDK_IMPLS = params.JDK_IMPL.trim().split("\\s*,\\s*");
+
+@Field String ebcDemandId = ""
 // if multiple JDK_VERSION / JDK_IMPL / PLATFORM are provided, run test jobs in parallel
 timestamps{
     if (JDK_VERSIONS.size() > 1 || JDK_IMPLS.size() > 1 || PLATFORMS.size() >1 || PLATFORMS.any { it.contains("all") }) {
@@ -163,106 +165,152 @@ timestamps{
             parallel testJobs
         }
     } else if (!JOB_NAME.contains("_imagePull") && !JOB_NAME.contains("_imageUpload") && params.TARGET == "dev.external" ) {
-        // trigger xxx_imageUpload test job, then xxx_imagePull test job
-        def commonLabel = "sw.tool.podman&&sw.tool.container.criu"
-        if (params.LABEL_ADDITION) {
-            commonLabel += "&&${params.LABEL_ADDITION}"
-        }
-        def imageUploadMap = [
-            'x86-64_linux' : [
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.ubuntu.22&&hw.arch.x86.broadwell"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.ubuntu.22&&hw.arch.x86.amd"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8&&hw.arch.x86.broadwell"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8&&hw.arch.x86.amd"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8&&hw.arch.x86.skylake"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.x86.amd"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.x86.broadwell"]
-                    ],
-            'aarch64_linux' : [
-                    	// no machine available ['LABEL_ADDITION' : "${commonLabel}&&sw.os.ubuntu.20"],
-                    	['LABEL_ADDITION' : "${commonLabel}&&sw.os.ubuntu.22&&hw.arch.aarch64.armv8"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8&&hw.arch.aarch64.armv8"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.aarch64.armv8"]
-                    ],
-            's390x_linux' : [
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.ubuntu.22&&hw.arch.s390x.z13"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.ubuntu.22&&hw.arch.s390x.z14"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.ubuntu.22&&hw.arch.s390x.z15"],
-                        // no machine available ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8&&hw.arch.s390x.z13"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8&&hw.arch.s390x.z14"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8&&hw.arch.s390x.z15"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.s390x.z14"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.s390x.z15"]
-                    ],
-            'ppc64le_linux' : [
-                        // no machine available ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8&&hw.arch.ppc64le.p9"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8&&hw.arch.ppc64le.p10"],
-                        // no machine available ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.ppc64le.p8"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.ppc64le.p9"],
-                        // no machine available ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.98&&hw.arch.ppc64le.p10"],
-            ]
-        ]
-        def imagePullMap = [
-            'x86-64_linux' : [
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.ubuntu.22"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9"]
-                    ],
-            'aarch64_linux' : [
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.ubuntu.22"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9"]
-                    ],
-            's390x_linux' : [
-                        ['LABEL_ADDITION' : "${commonLabel}&&hw.arch.s390x.z13"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&hw.arch.s390x.z14"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&hw.arch.s390x.z15"]
-                    ],
-            'ppc64le_linux' : [
-                        // Temporarily exclude ubuntu 24 machines due to issue runtimes_backlog 1506
-                        ['LABEL_ADDITION' : "${commonLabel}&&hw.arch.ppc64le.p10&&!sw.os.ubuntu.24"],
-                        ['LABEL_ADDITION' : "${commonLabel}&&hw.arch.ppc64le.p9&&!sw.os.ubuntu.24"]
+        def types = ["criu", "scc"]
+        def imageUploadJobs = [:]
+        def imagePullJobs = [:]
+        for (String type : types) {
+            def imageUploadMap = []
+            def imagePullMap = []
+            def target = "dev.external"
+            def buildList = ""
+            if (type == "criu") {
+                def commonLabel = "sw.tool.podman&&sw.tool.container.criu"
+                if (params.LABEL_ADDITION) {
+                    commonLabel += "&&${params.LABEL_ADDITION}"
+                }
+                buildList="external/criu,external/criu-portable-checkpoint,external/criu-portable-checkpoint,external/criu-portable-checkpoint,criu-ubi-portable-restore,external/criu-ubi-portable-checkpoint"
+                imageUploadMap = [
+                    'x86-64_linux' : [
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.ubuntu.22&&hw.arch.x86.broadwell"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.ubuntu.22&&hw.arch.x86.amd"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8&&hw.arch.x86.broadwell"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8&&hw.arch.x86.amd"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8&&hw.arch.x86.skylake"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.x86.amd"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.x86.broadwell"]
+                            ],
+                    'aarch64_linux' : [
+                                // no machine available ['LABEL_ADDITION' : "${commonLabel}&&sw.os.ubuntu.20"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.ubuntu.22&&hw.arch.aarch64.armv8"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8&&hw.arch.aarch64.armv8"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.aarch64.armv8"]
+                            ],
+                    's390x_linux' : [
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.ubuntu.22&&hw.arch.s390x.z13"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.ubuntu.22&&hw.arch.s390x.z14"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.ubuntu.22&&hw.arch.s390x.z15"],
+                                // no machine available ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8&&hw.arch.s390x.z13"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8&&hw.arch.s390x.z14"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8&&hw.arch.s390x.z15"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.s390x.z14"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.s390x.z15"]
+                            ],
+                    'ppc64le_linux' : [
+                                // no machine available ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8&&hw.arch.ppc64le.p9"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8&&hw.arch.ppc64le.p10"],
+                                // no machine available ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.ppc64le.p8"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.ppc64le.p9"],
+                                // no machine available ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.98&&hw.arch.ppc64le.p10"],
                     ]
-        ]
-        if (params.PLATFORM && imageUploadMap[params.PLATFORM] != null && imagePullMap[params.PLATFORM] != null) {
-            def imageUploadJobName = "${JOB_NAME}_imageUpload"
-            def imagePullJobName = "${JOB_NAME}_imagePull"
-            generateJobViaAutoGen(imageUploadJobName)
-            generateJobViaAutoGen(imagePullJobName)
+                ]
+                imagePullMap = [
+                    'x86-64_linux' : [
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.ubuntu.22"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9"]
+                            ],
+                    'aarch64_linux' : [
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.ubuntu.22"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.8"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9"]
+                            ],
+                    's390x_linux' : [
+                                ['LABEL_ADDITION' : "${commonLabel}&&hw.arch.s390x.z13"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&hw.arch.s390x.z14"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&hw.arch.s390x.z15"]
+                            ],
+                    'ppc64le_linux' : [
+                                // Temporarily exclude ubuntu 24 machines due to issue runtimes_backlog 1506
+                                ['LABEL_ADDITION' : "${commonLabel}&&hw.arch.ppc64le.p10&&!sw.os.ubuntu.24"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&hw.arch.ppc64le.p9&&!sw.os.ubuntu.24"]
+                            ]
+                ]
+                target = "testList TESTLIST=disabled.criu_pingPerf_testCreateRestoreImageAndPushToRegistry_ubi8,disabled.criu_pingPerf_testCreateRestoreImageAndPushToRegistry_ubi9,disabled.criu-portable-checkpoint_test,disabled.criu-ubi-portable-checkpoint_test"
 
-            def imageUploadJobs = [:]
-            def target = "testList TESTLIST=disabled.criu_pingPerf_testCreateRestoreImageAndPushToRegistry_ubi8,disabled.criu_pingPerf_testCreateRestoreImageAndPushToRegistry_ubi9,disabled.criu-portable-checkpoint_test,disabled.criu-ubi-portable-checkpoint_test"
-
-            if (params.PLATFORM == "ppc64le_linux") {
-                // exclude criu-portable-checkpoint_test on plinux due to github_ibm/runtimes/backlog/issues/1099
-                target = target.minus("disabled.criu-portable-checkpoint_test,")
-            }
-
-            echo "Trigger ${imageUploadJobName} job ..."
-            for (int i = 0; i < imageUploadMap[params.PLATFORM].size(); i++) {
-                def labelAddition = imageUploadMap[params.PLATFORM][i].LABEL_ADDITION
-                def newParams = ["LABEL_ADDITION" : labelAddition, "TARGET" : "${target}", "DOCKER_REGISTRY_DIR" : "${JOB_NAME}:${BUILD_NUMBER}"]
-                def childParams = changeParam(params, newParams)
-                imageUploadJobs["${imageUploadJobName}_${i}]"] = {
-                    build job: imageUploadJobName, parameters: childParams
+                if (params.PLATFORM == "ppc64le_linux") {
+                    // exclude criu-portable-checkpoint_test on plinux due to github_ibm/runtimes/backlog/issues/1099
+                    target = target.minus("disabled.criu-portable-checkpoint_test,")
                 }
+            } else if (type == "scc") {
+                def commonLabel = "sw.tool.podman"
+                if (params.LABEL_ADDITION) {
+                    commonLabel += "&&${params.LABEL_ADDITION}"
+                }
+                buildList="external/scc"
+                imageUploadMap = [
+                    's390x_linux' : [
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.s390x.z14"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.s390x.z17"],
+                            ],
+                    'ppc64le_linux' : [
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.ppc64le.p9"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.ppc64le.p11"],
+                    ]
+                ]
+                imagePullMap = [
+                    's390x_linux' : [
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.s390x.z14"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.s390x.z17"],
+                            ],
+                    'ppc64le_linux' : [
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.ppc64le.p9"],
+                                ['LABEL_ADDITION' : "${commonLabel}&&sw.os.rhel.9&&hw.arch.ppc64le.p11"]
+                            ]
+                ]
+
+                target = "testList TESTLIST=disabled.portable_scc_CreateImageAndPushToRegistry_ubi9"
+
             }
+            // trigger xxx_imageUpload test job, then xxx_imagePull test job
+            if (params.PLATFORM && imageUploadMap[params.PLATFORM] != null && imagePullMap[params.PLATFORM] != null) {
+                def imageUploadJobName = "${JOB_NAME}_${type}_imageUpload"
+                def imagePullJobName = "${JOB_NAME}_${type}_imagePull"
+                generateJobViaAutoGen(imageUploadJobName)
+                generateJobViaAutoGen(imagePullJobName)
+
+                echo "Create ${imageUploadJobName} job ..."
+                for (int i = 0; i < imageUploadMap[params.PLATFORM].size(); i++) {
+                    def labelAddition = imageUploadMap[params.PLATFORM][i].LABEL_ADDITION
+                    def newParams = ["LABEL_ADDITION" : labelAddition, "BUILD_LIST" : "${buildList}", "TARGET" : "${target}", "DOCKER_REGISTRY_DIR" : "${JOB_NAME}:${BUILD_NUMBER}"]
+                    def childParams = changeParam(params, newParams)
+                    imageUploadJobs["${imageUploadJobName}_${i}]"] = {
+                        // set propagate to false, so imageUploadJobs (i.e., criu) failures do not block imagePullJobs (i.e., scc).
+                        buildResult = build job: imageUploadJobName, parameters: childParams, propagate: false
+                    }
+                }
+
+                echo "Create ${imagePullJobName} job ..."
+                for (int i = 0; i < imagePullMap[params.PLATFORM].size(); i++) {
+                    def labelAddition = imagePullMap[params.PLATFORM][i].LABEL_ADDITION
+                    def newParams = ["LABEL_ADDITION" : labelAddition, "BUILD_LIST" : "${buildList}", "DOCKER_REGISTRY_DIR" : "${JOB_NAME}:${BUILD_NUMBER}"]
+                    def childParams = changeParam(params, newParams)
+                    imagePullJobs["${imagePullJobName}_${i}]"] = {
+                        build job: imagePullJobName, parameters: childParams
+                    }
+                }
+            } else {
+                echo "Cannot find key PLATFORM: ${params.PLATFORM} in imageUploadMap: ${imageUploadMap} and/or imagePullMap: ${imagePullMap}. Skipping..."
+            }
+        }
+        if (imageUploadJobs && imagePullJobs) {
+            echo "Trigger imageUploadJobs in parallel ..."
             parallel imageUploadJobs
-
-            def imagePullJobs = [:]
-            echo "Trigger ${imagePullJobName} job ..."
-            for (int i = 0; i < imagePullMap[params.PLATFORM].size(); i++) {
-                def labelAddition = imagePullMap[params.PLATFORM][i].LABEL_ADDITION
-                def newParams = ["LABEL_ADDITION" : labelAddition, "DOCKER_REGISTRY_DIR" : "${JOB_NAME}:${BUILD_NUMBER}"]
-                def childParams = changeParam(params, newParams)
-                imagePullJobs["${imagePullJobName}_${i}]"] = {
-                    build job: imagePullJobName, parameters: childParams
-                }
-            }
+            echo "Trigger imagePullJobs in parallel ..."
             parallel imagePullJobs
         } else {
-             assert false : "Cannot find key PLATFORM: ${params.PLATFORM} in imageUploadMap: ${imageUploadMap} and/or imagePullMap: ${imagePullMap}."
-        } 
+            assert false : "imageUploadJobs and/or imagePullJobs is empty. \n imageUploadJobs: ${imageUploadJobs} \n imagePullJobs: ${imagePullJobs}."
+        }
+
     } else {
         if (PLATFORM_MAP.containsKey(params.PLATFORM)) {
             env.EXTRA_OPTIONS = params.EXTRA_OPTIONS ? params.EXTRA_OPTIONS : ""
@@ -331,48 +379,54 @@ timestamps{
                         }
                     }
                 } else {
-                    // IF no nodes are idle we will check if there is supported virtual agent
-                    // When Parallel the race condition could happen. Say the number of multiply jobs is larger than the available nodes the query's result may be delayed and wrong
-                    // In this case jobs will be fooled to fall back to wait local busy nodes.
+                    // If CLOUD_PROVIDER is set, use the supported virtual agent.
                     dynamicAgents = PLATFORM_MAP[params.PLATFORM]["DynamicAgents"] ? PLATFORM_MAP[params.PLATFORM]["DynamicAgents"] : []
                     println "dynamicAgents: ${dynamicAgents}"
-
                     if ((params.CLOUD_PROVIDER != null && params.CLOUD_PROVIDER in dynamicAgents) || dockerAgents) {
-                        boolean isNodeIdle = false
-                        node {
-                            String[] onlineNodes = nodesByLabel(LABEL)
-                            for (String onlineNode : onlineNodes) {
-                                def currentNode = Jenkins.instance.getNode(onlineNode).getComputer()
-                                if (!currentNode.isOffline()) {
-                                    if (currentNode.countBusy() < currentNode.getNumExecutors()) {
-                                        println "Found an idle node: ${onlineNode}. The program will not start dynamic vm."
-                                        isNodeIdle = true
-                                        break
+                        // DynamicAgents and DockerAgents shouldn't contain the same label
+                        if (params.CLOUD_PROVIDER != null && params.CLOUD_PROVIDER in dynamicAgents) {
+                            if (params.CLOUD_PROVIDER == "EBC") {
+                                boolean ebcNode = false
+                                ebcDemandId = UUID.randomUUID().toString()
+                                def dynamicMachineLabel = 'ci.agent.dynamic.' + ebcDemandId
+                                try {
+                                    timeout(time: 120, unit: 'MINUTES') {
+                                        // ToDo: pass in platform once we support more platforms. For now, we only support xlinux.
+                                        getEBCNode(ebcDemandId, dynamicMachineLabel)
+                                        node(dynamicMachineLabel) {
+                                            echo "EBC node ${dynamicMachineLabel} is ready"
+                                        }
+                                        ebcNode = true
                                     }
+                                } catch (Exception e) {
+                                    echo 'Exception: ' + e.toString()
+                                    echo "Cannot launch EBC node ${dynamicMachineLabel}..."
                                 }
-                            }
-                        }
-                        if (!isNodeIdle) {
-                            // DynamicAgents and DockerAgents shouldn't contain the same label
-                            if (params.CLOUD_PROVIDER != null && params.CLOUD_PROVIDER in dynamicAgents) {
+                                if (ebcNode) {
+                                    LABEL = dynamicMachineLabel
+                                    echo "Use EBC node ${LABEL}..."
+                                } else {
+                                    echo "Use static node ${LABEL}..."
+                                }
+                            } else {
                                 LABEL = LABEL.minus("ci.role.test&&")
                                 LABEL += '&&ci.agent.dynamic'
-                                println "Cannot find any idle nodes. Starting dynamic vm, nodeLabel: '${LABEL}', dynamicLabel: '${params.CLOUD_PROVIDER}'"
-                            } else if (params.CLOUD_PROVIDER != null && params.CLOUD_PROVIDER in dockerAgents) {
-                                dockerAgentLabel = params.CLOUD_PROVIDER
-                            } else if (dockerAgents.size() >= 1) {
-                                dockerAgentLabel = dockerAgents[0]
+                                println "Starting dynamic vm, nodeLabel: '${LABEL}', dynamicLabel: '${params.CLOUD_PROVIDER}'"
                             }
-                            if (!dockerAgentLabel.equals('')) {
-                                if (dockerAgentLabel.equals('default') && SPEC.equals('linux_riscv64')) {
-                                    LABEL = LABEL.minus("&&hw.arch.riscv")
-                                    LABEL += '&&hw.arch.x86'
-                                    if (!LABEL.contains('&&sw.tool.docker')) {
-                                        LABEL += '&&sw.tool.docker'
-                                    }
+                        } else if (params.CLOUD_PROVIDER != null && params.CLOUD_PROVIDER in dockerAgents) {
+                            dockerAgentLabel = params.CLOUD_PROVIDER
+                        } else if (dockerAgents.size() >= 1) {
+                            dockerAgentLabel = dockerAgents[0]
+                        }
+                        if (!dockerAgentLabel.equals('')) {
+                            if (dockerAgentLabel.equals('default') && SPEC.equals('linux_riscv64')) {
+                                LABEL = LABEL.minus("&&hw.arch.riscv")
+                                LABEL += '&&hw.arch.x86'
+                                if (!LABEL.contains('&&sw.tool.docker')) {
+                                    LABEL += '&&sw.tool.docker'
                                 }
-                                println "Cannot find any idle nodes. Starting run test on docker node, nodeLabel: '${LABEL}', dockerAgentLabel: '${dockerAgentLabel}'"
                             }
+                            println "Starting run test on docker node, nodeLabel: '${LABEL}', dockerAgentLabel: '${dockerAgentLabel}'"
                         }
                     }
                 }
@@ -534,6 +588,18 @@ def runTest() {
                 }
             }
         }
+        if (params.CLOUD_PROVIDER == "EBC" && ebcDemandId) {
+            try {
+                println("Triggering EBC_Delete_Node job with demandId: ${ebcDemandId}")
+                def parameters = [
+                    string(name: 'demandId', value: ebcDemandId)
+                ]
+                build job: 'EBC_Delete_Node', parameters: parameters, propagate: false
+            } catch (Exception e) {
+                println("Warning: Exception when triggering EBC_Delete_Node. This does not affect test build result.")
+                println(e.toString())
+            }
+        }
     }
 }
 
@@ -563,12 +629,12 @@ private String resolvePlatform(PLATFORM, JDK_VERSION) {
 }
 
 def areNodesWithLabelOnline(labelToCheck) {
-            String[] onlineNodes = nodesByLabel(labelToCheck)
-            if (onlineNodes.size() < 1) {
-                return false
-            }
-            return true
-        }
+    String[] onlineNodes = nodesByLabel(labelToCheck)
+    if (onlineNodes.size() < 1) {
+        return false
+    }
+    return true
+}
 
 
 def checkErrors(errorList) {
@@ -664,4 +730,31 @@ def generateJobViaAutoGen(testJobName) {
 
         build job: 'Test_Job_Auto_Gen', parameters: jobParams, propagate: true
     }
+}
+
+def getEBCNode(demandId, dynamicMachineLabel) {
+    library 'jenkins-ci-websphere'
+    def ebcPlan = 'hur-runtimesJenkins-aqa-ubuntu22_x86.yml'
+    def ebcShortlist = ''
+    int expectedNodeLifespan = params.TIME_LIMIT ? Integer.parseInt(params.TIME_LIMIT) : 1
+    echo "Calling ebcJenkinsNodeDemand() with demandId: ${demandId} and label: ${dynamicMachineLabel}"
+    def ebcArgs = [
+                    demandId: demandId, 
+                    ebcPlan: ebcPlan,
+                    ebcShortlist: ebcShortlist,
+                    autoCompleteAfterXHours: expectedNodeLifespan + 1,
+                    ebcBranch: 'prod', 
+                    credentialsId: "${params.EBC_CREDENTIALS_ID}",
+                    extraProps: ['ebc_remotePlaybook_gitRepoUrl=git@github.ibm.com:runtimes/infra-can.git',
+                        'ebc_jenkins_server_instance_name=hyc-runtimes-jenkins.swg-devops.com',
+                        'ebc_jenkins_service_name=runtimes-jenkins',
+                        "ebc_jenkins_agent_label=${dynamicMachineLabel}",
+                        'ebc_remotePlaybook_gitBranch=openj9',
+                        'ebc_remotePlaybook_file=ansible/playbooks/ibm_unix_playbook/ibm_jenkins_unix_test.yml',
+                        "ebc_ansible_extra_vars='is_ebc=true'",
+                        'ebc_remotePlaybook_jenkinsUserSshPubKey=unused']
+                    ]
+    echo "EBC Args: ${ebcArgs}"
+    def ebcResult = ebcJenkinsNodeDemand(ebcArgs);
+    echo "EBC Result: ${ebcResult}"
 }

@@ -36,8 +36,28 @@ params.each { param ->
 def perfConfigJson = []
 node("ci.role.test&&hw.arch.x86&&sw.os.linux") {
     checkout scm
+
     dir (env.WORKSPACE) {
-        def filePath = "./aqa-tests/perf/config/${params.JDK_IMPL}/"
+        def subdir = params.JDK_IMPL ?: "hotspot"
+        if (params.JDK_IMPL == "ibm") {
+            subdir = "openj9"
+        }
+        def filePath = "./aqa-tests/perf/config/${subdir}/"
+        // If vendor repo and branch is set, use vendor repo perfConfigJson file.
+        if (params.VENDOR_TEST_REPOS && params.VENDOR_TEST_BRANCHES) {
+            def vendorRepoDir = "vendorRepo"
+            def statusCode = -1
+            sshagent (credentials: ["$params.USER_CREDENTIALS_ID"], ignoreMissing: true) {
+                statusCode =  sh returnStatus: true, script: """
+                    git clone -q --depth 1 -b ${params.VENDOR_TEST_BRANCHES} ${params.VENDOR_TEST_REPOS} ${vendorRepoDir}
+                """
+            }
+            if (statusCode == 0) {
+                filePath = "./${vendorRepoDir}/perf/config/${subdir}/"
+            } else {
+                assert false: "Cannot git clone -b ${params.VENDOR_TEST_BRANCHES} ${params.VENDOR_TEST_REPOS}. Status code: ${statusCode}"
+            }
+        }
         filePath = filePath + "perfConfig.json"
         echo "Read JSON from file ${filePath}..."
         perfConfigJson = readJSON(file: "${filePath}")
@@ -74,12 +94,14 @@ timestamps {
                             for (int i = 0; i < PERF_ITERATIONS; i++) {
                                 // test
                                 testParams << string(name: "TEST_NUM", value: "TEST_NUM" + i.toString())
-                                triggerJob("${item.BENCHMARK}", "${platform}", testParams, "test")
+                                def testRun = triggerJob("${item.BENCHMARK}", "${platform}", testParams, "test")
+                                aggregateLogs(testRun)
 
                                 // baseline
                                 if (RUN_BASELINE) {
                                     baselineParams << string(name: "BASELINE_NUM", value: "BASELINE_NUM_" + i.toString())
-                                    triggerJob("${item.BENCHMARK}", "${platform}", baselineParams, "baseline")
+                                    def baseRun = triggerJob("${item.BENCHMARK}", "${platform}", baselineParams, "baseline")
+                                    aggregateLogs(baseRun)
                                 } else {
                                     echo "Skipping baseline run since RUN_BASELINE is set to false"
                                 }
@@ -114,4 +136,29 @@ def generateChildJobViaAutoGen(newJobName) {
     jobParams << string(name: 'JDK_IMPL', value: params.JDK_IMPL)
 
     build job: 'Test_Job_Auto_Gen', parameters: jobParams, propagate: true
+}
+
+def aggregateLogs(run) {
+        node(env.SETUP_LABEL) {
+                def buildId  = run.getRawBuild().getNumber()
+                def name     = run.getProjectName()
+                def result   = run.getCurrentResult()
+
+                echo "${name} #${buildId} completed with status ${result}, copying logs..."
+
+                try {
+                        timeout(time: 1, unit: 'HOURS') {
+                                copyArtifacts(
+                                        projectName: name,
+                                        selector: specific("${buildId}"),
+                                        filter: "**/${name}_${buildId}.log",
+                                        target: "."
+                                )
+                        }
+                        archiveArtifacts artifacts: "${name}_${buildId}.log", fingerprint: true, allowEmptyArchive: false
+                        sh "rm -f '${name}_${buildId}.log'"
+                } catch (Exception e) {
+                        echo "Cannot copy ${name}_${buildId}.log from ${name}: ${e}"
+                }
+        }
 }

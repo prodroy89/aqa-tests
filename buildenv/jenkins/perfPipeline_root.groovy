@@ -63,6 +63,7 @@ node("worker || (ci.role.test&&hw.arch.x86&&sw.os.linux)") {
                 baseParams << string(name: "BENCHMARK", value: item.BENCHMARK)
                 baseParams << string(name: "TARGET", value: item.TARGET)
                 baseParams << string(name: "BUILD_LIST", value: item.BUILD_LIST)
+                baseParams << string(name: "PERF_ITERATIONS", value: item.PERF_ITERATIONS ? item.PERF_ITERATIONS.toString() : "4")
                 
                 item.PLAT_MACHINE_MAP.each { kv -> 
                         kv.each {p, m -> 
@@ -73,11 +74,17 @@ node("worker || (ci.role.test&&hw.arch.x86&&sw.os.linux)") {
 
                                 def shortName = (params.JDK_IMPL && params.JDK_IMPL == "hotspot") ? "hs" : "j9"
                                 def jobName = "Perf_openjdk${params.JDK_VERSION}_${shortName}_sanity.perf_${p}_${item.BENCHMARK}"
-                                def jobIsRunnable = JobHelper.jobIsRunnable(jobName)
-                                echo "jobName ${jobName} params: ${thisChildParams}"
-                                if (!jobIsRunnable) {
+                                if (params.GENERATE_JOBS) {
                                         echo "Generating downstream job '${jobName}' from perfL2JobTemplate …"
                                         createPerfL2Job(jobName, p, item.BENCHMARK)
+                                }
+                                else {
+                                        def jobIsRunnable = JobHelper.jobIsRunnable(jobName)
+                                        echo "jobName ${jobName} params: ${thisChildParams}"
+                                        if (!jobIsRunnable) {
+                                                echo "Generating downstream job '${jobName}' from perfL2JobTemplate …"
+                                                createPerfL2Job(jobName, p, item.BENCHMARK)
+                                        }
                                 }
                                 JOBS[jobName] = {
                                         build job: jobName, parameters: thisChildParams, propagate: true

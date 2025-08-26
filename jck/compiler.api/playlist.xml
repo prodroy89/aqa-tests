@@ -24,12 +24,6 @@
 		$(TEST_STATUS); \
 		$(GEN_SUMMARY_GENERIC) testsuite=COMPILER tests="$(JCKCOMPILER_CUSTOM_TARGET)" isCustomTarget="isCustomTarget"
 		</command>
-		<disables>
-			<disable>
-				<comment>Temp exclude for Jul_2025 release, if testcases fail, auto-reruns will fail</comment>
-				<impl>hotspot</impl>
-			</disable>
-		</disables>
 		<levels>
 			<level>dev</level>
 		</levels>
@@ -39,16 +33,6 @@
 	</test>
 	<test>
 		<testCaseName>jck-compiler-api-java_rmi</testCaseName>
-		<disables>
-			<disable>
-				<comment>Disabled on all platforms and Java levels due to backlog/issues/559. To be run manually by CR team</comment>
-				<impl>ibm</impl>
-			</disable>
-			<disable>
-				<comment>Disabled on all platforms and Java levels due to backlog/issues/559. To be run manually by CR team</comment>
-				<impl>openj9</impl>
-			</disable>
-		</disables>
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>
@@ -104,14 +88,6 @@
 	</test>
 	<test>
 		<testCaseName>jck-compiler-api-javax_tools</testCaseName>
-		<disables>
-			<disable>
-				<comment>Temporarily disabled on z/OS for backlog/issues/669</comment>
-				<platform>.*zos.*</platform>
-				<impl>ibm</impl>
-				<version>11</version>
-			</disable>
-		</disables>
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>
@@ -129,14 +105,6 @@
 	</test>
 	<test>
 		<testCaseName>jck-compiler-api-signaturetest</testCaseName>
-		<disables>
-			<disable>
-				<comment>Temporarily disabled on aix on JDK8 for test setup issue: backlog/issues/506</comment>
-				<platform>ppc64_aix</platform>
-				<version>8</version>
-				<impl>openj9</impl>
-			</disable>
-		</disables>
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>
@@ -154,20 +122,6 @@
 	</test>
 	<test>
 		<testCaseName>jck-compiler-api-java_rmi_multijvm</testCaseName>
-		<disables>
-			<disable>
-				<comment>Disabled on all platforms and Java levels due to backlog/issues/559. To be run manually by CR team</comment>
-				<impl>ibm</impl>
-			</disable>
-			<disable>
-				<comment>Disabled on all platforms and Java levels due to backlog/issues/559. To be run manually by CR team</comment>
-				<impl>openj9</impl>
-			</disable>
-			<disable>
-				<comment>Disabled temporarily in multijvm mode</comment>
-				<impl>hotspot</impl>
-			</disable>
-		</disables>
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>
@@ -189,12 +143,6 @@
 	</test>
 	<test>
 		<testCaseName>jck-compiler-api-javax_annotation_multijvm</testCaseName>
-		<disables>
-			<disable>
-				<comment>Disabled temporarily in multijvm mode</comment>
-				<impl>hotspot</impl>
-			</disable>
-		</disables>
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>
@@ -212,12 +160,6 @@
 	</test>
 	<test>
 		<testCaseName>jck-compiler-api-javax_lang_multijvm</testCaseName>
-		<disables>
-			<disable>
-				<comment>Disabled temporarily in multijvm mode</comment>
-				<impl>hotspot</impl>
-			</disable>
-		</disables>
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>
@@ -235,18 +177,6 @@
 	</test>
 	<test>
 		<testCaseName>jck-compiler-api-javax_tools_multijvm</testCaseName>
-		<disables>
-			<disable>
-				<comment>Temporarily disabled on z/OS for backlog/issues/669</comment>
-				<platform>.*zos.*</platform>
-				<impl>ibm</impl>
-				<version>11</version>
-			</disable>
-			<disable>
-				<comment>Disabled temporarily in multijvm mode</comment>
-				<impl>hotspot</impl>
-			</disable>
-		</disables>
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>
@@ -264,18 +194,6 @@
 	</test>
 	<test>
 		<testCaseName>jck-compiler-api-signaturetest_multijvm</testCaseName>
-		<disables>
-			<disable>
-				<comment>Temporarily disabled on aix on JDK8 for test setup issue: backlog/issues/506</comment>
-				<platform>ppc64_aix</platform>
-				<version>8</version>
-				<impl>openj9</impl>
-			</disable>
-			<disable>
-				<comment>Disabled temporarily in multijvm mode</comment>
-				<impl>hotspot</impl>
-			</disable>
-		</disables>
 		<variations>
 			<variation>NoOptions</variation>
 		</variations>

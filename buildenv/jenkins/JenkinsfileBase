@@ -1028,7 +1028,18 @@ def testBuild() {
 				if (statusCode == 0) {
 					runMulticastCmd = true
 				}
-			}
+			} else (PLATFORM.contains("windows")) {
+                 def batchFilePath = "C:\\EnableMulticast.batt"
+                 def process = batchFilePath.execute()
+                 def stdout = new StringBuilder()
+                 process.in.eachLine { line -> stdout.append(line).append("\n") }
+                 def stderr = new StringBuilder()
+                 process.err.eachLine { line -> stderr.append(line).append("\n") }
+                 process.waitFor()
+                 println "Batch file output:\n${stdout}"
+                 println "Batch file errors:\n${stderr}"
+                 println "Exit code: ${process.exitValue()}"
+            }
 		}
 		echo "runMulticastCmd: ${runMulticastCmd}"
 		try {

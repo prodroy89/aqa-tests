@@ -245,11 +245,25 @@ def setupParallelEnv() {
 					echo "Regenerate parallel list with NUM_MACHINES=${MAX_NUM_MACHINES}."
 					PARALLEL_OPTIONS = PARALLEL_OPTIONS_TEMP + " NUM_MACHINES=${MAX_NUM_MACHINES} TEST_TIME="
 					NUM_LIST = genParallelList(PARALLEL_OPTIONS)
-				} else if (NUM_LIST < 6 && (env.JDK_IMPL == "openj9" || env.JDK_IMPL == "ibm") && (TARGET == "extended.jck" || TARGET == "special.system")) {
-					echo "NUM_LIST value ${NUM_LIST} may not be calculated based on the actual execution time."
-					echo "Regenerate parallel list with NUM_MACHINES=6 for TARGET ${TARGET}."
-					PARALLEL_OPTIONS = PARALLEL_OPTIONS_TEMP + " NUM_MACHINES=6 TEST_TIME="
-					NUM_LIST = genParallelList(PARALLEL_OPTIONS)
+				} else if (env.JDK_IMPL == "openj9" || env.JDK_IMPL == "ibm") {
+					if (TARGET == "extended.jck" || TARGET == "special.system") {
+						int minParallelNum = 10
+						if (PLATFORM.contains('windows')) {
+							minParallelNum = 15
+						}
+						if (NUM_LIST < minParallelNum) {
+							echo "NUM_LIST value ${NUM_LIST} may not be calculated based on the actual execution time."
+							echo "Regenerate parallel list with NUM_MACHINES=${minParallelNum} for TARGET ${TARGET}."
+							PARALLEL_OPTIONS = PARALLEL_OPTIONS_TEMP + " NUM_MACHINES=${minParallelNum} TEST_TIME="
+							NUM_LIST = genParallelList(PARALLEL_OPTIONS)
+						}
+					} else if (TARGET == "sanity.functional" && PLATFORM.contains('windows')) {
+						if (NUM_LIST < 6) {
+							echo "Regenerate parallel list with NUM_MACHINES=6 for TARGET ${TARGET} due to long running tests (runtimes/automation/issues/654)."
+							PARALLEL_OPTIONS = PARALLEL_OPTIONS_TEMP + " NUM_MACHINES=6 TEST_TIME="
+							NUM_LIST = genParallelList(PARALLEL_OPTIONS)
+						}
+					}
 				} else if (NUM_LIST == 1 && env.JDK_IMPL == "hotspot" && (TARGET.contains("openjdk") || TARGET.contains("system"))) {
 					int FORCE_NUM_MACHINES = Math.min(3, MAX_NUM_MACHINES);
 					echo "NUM_LIST=1, Fall back to regenerate parallel lists with NUM_MACHINES=${FORCE_NUM_MACHINES}."
@@ -788,6 +802,7 @@ def runTest( ) {
 			if (env.SPEC.contains('linux') && !(LABEL.contains('ci.agent.dynamic') && CLOUD_PROVIDER == 'azure') && (BUILD_LIST != "external")) {
 				// Detect if Xvfb is on the machine, and if not use the wayland startup code (Initially for EL10)
 				if ( sh(script:"which Xvfb 2>&1", returnStatus:true) != 0 ) {
+					sh "mkdir -p -m 1777 /tmp/.X11-unix"
 					sh "weston --no-config --socket=wayland-vfb --backend=headless-backend.so --xwayland &"
 					env.DISPLAY = ":0"
 
@@ -1370,29 +1385,17 @@ def getFailedAndCustomizedTest(String paths="") {
 							failedTestCasesInfo = failedTestCasesInfo.substring(0, failedTestCasesInfo.indexOf('Test results:'))
 							failedTestCasesInfo = failedTestCasesInfo.split("\\n").join(" ").replaceAll("TEST: ", "")
 							if (failedtest.startsWith("jdk_")) {
-								if (!jdkFailedTestCaseList.contains(failedTestCasesInfo)) {
-									jdkFailedTestCaseList += "${failedTestCasesInfo} "
-								}
+								jdkFailedTestCaseList = mergeTestCasesWithoutDup(jdkFailedTestCaseList, failedTestCasesInfo)
 							} else if (failedtest.startsWith("jck-runtime") || failedtest.startsWith("jckruntime")) {
-								if (!jckRuntimeFailedTestCaseList.contains(failedTestCasesInfo)) {
-									jckRuntimeFailedTestCaseList += "${failedTestCasesInfo} "
-								}
+								jckRuntimeFailedTestCaseList = mergeTestCasesWithoutDup(jckRuntimeFailedTestCaseList, failedTestCasesInfo)
 							} else if (failedtest.startsWith("jck-compiler") || failedtest.startsWith("jckcompiler")) {
-								if (!jckCompilerFailedTestCaseList.contains(failedTestCasesInfo)) {
-									jckCompilerFailedTestCaseList += "${failedTestCasesInfo} "
-								}
+								jckCompilerFailedTestCaseList = mergeTestCasesWithoutDup(jckCompilerFailedTestCaseList, failedTestCasesInfo)
 							} else if (failedtest.startsWith("jck-devtools") || failedtest.startsWith("jckdevtools")) {
-								if (!jckDevtoolsFailedTestCaseList.contains(failedTestCasesInfo)) {
-									jckDevtoolsFailedTestCaseList += "${failedTestCasesInfo} "
-								}
+								jckDevtoolsFailedTestCaseList = mergeTestCasesWithoutDup(jckDevtoolsFailedTestCaseList, failedTestCasesInfo)
 							} else if (failedtest.startsWith("langtools_")){
-								if (!langtoolsFailedTestCaseList.contains(failedTestCasesInfo)) {
-									langtoolsFailedTestCaseList += "${failedTestCasesInfo} "
-								}
+								langtoolsFailedTestCaseList = mergeTestCasesWithoutDup(langtoolsFailedTestCaseList, failedTestCasesInfo)
 							} else {
-								if (!hotspotFailedTestCaseList.contains(failedTestCasesInfo)) {
-									hotspotFailedTestCaseList += "${failedTestCasesInfo} "
-								}
+								hotspotFailedTestCaseList = mergeTestCasesWithoutDup(hotspotFailedTestCaseList, failedTestCasesInfo)
 							}
 						}
 					}
@@ -1436,6 +1439,13 @@ def getFailedAndCustomizedTest(String paths="") {
 		}
 	}
 	return null
+}
+
+def mergeTestCasesWithoutDup(String knownTestCases, String newTestCases) {
+	def knownTestCasesList = knownTestCases.split(/\s+/)
+	def newTestCasesList = newTestCases.split(/\s+/)
+	def filterednewTestCases = newTestCasesList.findAll { !(it in knownTestCasesList) }
+	return ( knownTestCases + " " + filterednewTestCases.join(" "))
 }
 
 def addFailedTestsGrinderLink(paths="") {
@@ -1573,6 +1583,9 @@ def triggerRerunJob (String originalStatus, Map rerunTestJobParams = null) {
 					def childJobs = parallel rerunTestJobs
 					def rerunResults = archiveChildJobTap(childJobs, originalStatus)
 					if (env.JDK_IMPL == "openj9" || env.JDK_IMPL == "ibm") {
+						currentBuild.result = originalStatus
+					} else if ( originalStatus == 'ABORTED') { 
+						// Set job status to the worst result among its parallel branches including rerun branch.
 						currentBuild.result = originalStatus
 					} else {
 						currentBuild.result = rerunResults.jobStatus

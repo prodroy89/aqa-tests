@@ -572,8 +572,8 @@ public class JavatestUtil {
 				}
 				else {
 					if ( !spec.contains("win") ) {
-						generatedJti.setProperty("jck.env.testPlatform.headless", "No");
-						generatedJti.setProperty("jck.env.testPlatform.xWindows", "Yes");
+						generatedJti.setProperty("jck.env.testPlatform.headless", "Yes");
+						#generatedJti.setProperty("jck.env.testPlatform.xWindows", "Yes");
 						if ( !spec.contains("osx") ) { 
 							String display = System.getenv("DISPLAY");
 							if ( display == null ) {
@@ -581,7 +581,7 @@ public class JavatestUtil {
 								return false; 
 							}
 							else {
-								generatedJti.setProperty("jck.env.testPlatform.display", display);
+								#generatedJti.setProperty("jck.env.testPlatform.display", display);
 							}
 						}
 					}
@@ -589,7 +589,7 @@ public class JavatestUtil {
 			}
 
 			if ( !spec.contains("win") && (tests.contains("api/signaturetest") || tests.contains("api/java_io")) ) {
-				generatedJti.setProperty("jck.env.testPlatform.xWindows", "No");
+				#generatedJti.setProperty("jck.env.testPlatform.xWindows", "No");
 			}
 
 			generatedJti.setProperty("jck.env.runtime.testExecute.cmdAsString", pathToJava);
@@ -698,7 +698,7 @@ public class JavatestUtil {
 			// The jplisLivePhase and Robot available settings are rejected if placed higher up in the .jtb file
 			if ( tests.contains("api/java_awt") || tests.contains("api/javax_swing") || tests.equals("api") ) {
 				if ( robotAvailable == "Yes" ) {
-					generatedJti.setProperty("jck.env.runtime.awt.robotAvailable", robotAvailable);
+					#generatedJti.setProperty("jck.env.runtime.awt.robotAvailable", robotAvailable);
 				}
 			}
 			if ( tests.equals("api/java_lang") || tests.contains("api/java_lang/instrument") || tests.equals("api") ) {

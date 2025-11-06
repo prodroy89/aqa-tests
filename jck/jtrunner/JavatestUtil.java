@@ -589,7 +589,7 @@ public class JavatestUtil {
 			}
 
 			if ( !spec.contains("win") && (tests.contains("api/signaturetest") || tests.contains("api/java_io")) ) {
-				
+				generatedJti.setProperty("jck.env.testPlatform.xWindows", "No");
 			}
 
 			generatedJti.setProperty("jck.env.runtime.testExecute.cmdAsString", pathToJava);

@@ -572,8 +572,8 @@ public class JavatestUtil {
 				}
 				else {
 					if ( !spec.contains("win") ) {
-						generatedJti.setProperty("jck.env.testPlatform.headless", "No");
-						generatedJti.setProperty("jck.env.testPlatform.xWindows", "Yes");
+						generatedJti.setProperty("jck.env.testPlatform.headless", "Yes");
+						
 						if ( !spec.contains("osx") ) { 
 							String display = System.getenv("DISPLAY");
 							if ( display == null ) {

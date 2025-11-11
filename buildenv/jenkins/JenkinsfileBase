@@ -805,7 +805,7 @@ def runTest( ) {
 			if (env.SPEC.contains('linux') && !(LABEL.contains('ci.agent.dynamic') && CLOUD_PROVIDER == 'azure') && (BUILD_LIST != "external")) {
 				// Detect if Xvfb is on the machine, and if not use the wayland startup code (Initially for EL10)
 				if ( sh(script:"which Xvfb 2>&1", returnStatus:true) != 0 ) {
-					
+					env.DISPLAY = "rtsvc-ubu22x86-hur-1.hursley.ibm.com:1"
 
 					echo "env.DISPLAY is ${env.DISPLAY}"
 					sshagent (credentials: ["$params.SSH_AGENT_CREDENTIAL"], ignoreMissing: true) {
@@ -900,7 +900,7 @@ def checkTestResults(results) {
 def post(output_name) {
 	stage('Post') {
 		if (env.DISPLAY != null) {
-			env.DISPLAY = "rtsvc-ubu22x86-hur-1.hursley.ibm.com:1"
+			env.DISPLAY = ""
 		}
 		if (output_name.contains(',')) {
 			output_name = "specifiedTarget"

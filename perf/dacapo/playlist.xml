@@ -15,16 +15,10 @@
 <playlist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../TKG/resources/playlist.xsd">
 	<test>
 		<testCaseName>dacapo-eclipse</testCaseName>
-                <disables>
-                        <disable>
-                                <comment>https://github.com/adoptium/aqa-tests/issues/4858#issuecomment-2968494739</comment>
-                                <version>8</version>
-                        </disable>
-                </disables>
 		<command>$(JAVA_COMMAND) $(JVM_OPTIONS) -jar $(Q)$(TEST_RESROOT)$(D)dacapo.jar$(Q) eclipse; \
 		$(TEST_STATUS)</command>
 		<versions>
-			<version>8</version>
+			<version>11+</version>
 		</versions>
 		<levels>
 			<level>sanity</level>
@@ -101,7 +95,7 @@
                         <disable>
                                 <comment>https://github.com/adoptium/aqa-tests/issues/4858#issuecomment-2968494739</comment>
                                 <version>8</version>
-                                <platform>x86-64_windows</platform>
+                                <platform>x86-64_windows|x86-32_windows</platform>
                         </disable>
                 </disables>
 		<command>$(JAVA_COMMAND) $(JVM_OPTIONS) -jar $(Q)$(TEST_RESROOT)$(D)dacapo.jar$(Q) jython; \
@@ -115,12 +109,6 @@
 	</test>
 	<test>
 		<testCaseName>dacapo-luindex</testCaseName>
-                <disables>
-                        <disable>
-                                <comment>https://github.com/adoptium/aqa-tests/issues/4858#issuecomment-2968494739</comment>
-                                <version>8</version>
-                        </disable>
-                </disables>
 		<command>$(JAVA_COMMAND) $(JVM_OPTIONS) -jar $(Q)$(TEST_RESROOT)$(D)dacapo.jar$(Q) luindex; \
 		$(TEST_STATUS)</command>
 		<levels>
@@ -129,6 +117,9 @@
 		<groups>
 			<group>perf</group>
 		</groups>
+		<versions>
+			<version>11+</version>
+		</versions>
 	</test>
 	<test>
 		<testCaseName>dacapo-lusearch-fix</testCaseName>
@@ -151,7 +142,11 @@
                 <disables>
                         <disable>
                                 <comment>https://github.com/adoptium/aqa-tests/issues/4858#issuecomment-2968494739</comment>
-                                <platform>x86-64_windows</platform>
+                                <platform>x86-64_windows|x86-32_windows</platform>
+                        </disable>
+                        <disable>
+                                <comment>https://github.com/adoptium/aqa-tests/issues/6563</comment>
+                                <platform>aarch64_windows</platform>
                         </disable>
                 </disables>
 		<command>$(JAVA_COMMAND) $(JVM_OPTIONS) -jar $(Q)$(TEST_RESROOT)$(D)dacapo.jar$(Q) pmd; \
@@ -176,13 +171,11 @@
 	</test>
 	<test>
 		<testCaseName>dacapo-tomcat</testCaseName>
-                <disables>
-                        <disable>
-                                <comment>https://bugs.openjdk.java.net/browse/JDK-8155588</comment>
-                        </disable>
-                </disables>
 		<command>$(JAVA_COMMAND) $(JVM_OPTIONS) -jar $(Q)$(TEST_RESROOT)$(D)dacapo.jar$(Q) tomcat; \
 		$(TEST_STATUS)</command>
+		<versions>
+    			<version>11+</version>
+		</versions>
 		<levels>
 			<level>extended</level>
 		</levels>

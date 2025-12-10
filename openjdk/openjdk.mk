@@ -207,9 +207,16 @@ TEST_VARIATION_JIT_PREVIEW:=
 TEST_VARIATION_JIT_AGGRESIVE:=
 TIMEOUT_HANDLER:=
 
-# if JDK_IMPL is openj9 or ibm
+# if JDK_IMPL is openj9 or ibm. 
+# When updating the PROBLEM_LIST_FILE for Project Valhalla also update it
+# in the build.xml dist target.
 ifneq ($(filter openj9 ibm, $(JDK_IMPL)),)
-	PROBLEM_LIST_FILE:=excludes/ProblemList_openjdk$(JDK_VERSION)-openj9.txt
+	ifneq ($(filter Valhalla, $(JDK_VERSION)),)
+		PROBLEM_LIST_FILE:=excludes/ProblemList_openjdk26-openj9.txt
+		PROBLEM_LIST_FILE_VALHALLA:=excludes/ProblemList_openjdkvalhalla-openj9.txt
+	else
+		PROBLEM_LIST_FILE:=excludes/ProblemList_openjdk$(JDK_VERSION)-openj9.txt
+	endif
 	PROBLEM_LIST_DEFAULT:=excludes/ProblemList_openjdk11-openj9.txt
 	TEST_VARIATION_DUMP:=-Xdump:system:none -Xdump:heap:none -Xdump:system:events=gpf+abort+traceassert+corruptcache
 	TEST_VARIATION_JIT_PREVIEW:=-XX:-JITServerTechPreviewMessage
@@ -242,8 +249,8 @@ else ifneq (,$(findstring OpenJCEPlus, $(TEST_FLAG)))
 	FEATURE_PROBLEM_LIST_FILE:=-exclude:$(Q)$(JTREG_JDK_TEST_DIR)$(D)ProblemList-OpenJCEPlus.txt$(Q)
 endif
 
-# If we are on alpine, also use the exclude file specific to alpine.
-ALPINE_PROBLEM_LIST_FILE:=$(TEST_ROOT)$(D)openjdk$(D)excludes$(D)alpine$(D)ProblemList_openjdk$(JDK_VERSION)_alpine.txt
+# If we are on alpine, we should also use the alpine-specific exclude file/s.
+ALPINE_PROBLEM_LIST_FILE:=$(TEST_ROOT)$(D)openjdk$(D)excludes$(D)alpine$(D)ProblemList_openjdk$(JDK_VERSION).txt
 ifneq (,$(findstring alpine, $(SPEC)))
 	ifneq (,$(realpath $(ALPINE_PROBLEM_LIST_FILE)))
 		ifeq (,$(FEATURE_PROBLEM_LIST_FILE))

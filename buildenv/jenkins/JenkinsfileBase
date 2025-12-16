@@ -6,7 +6,12 @@ import org.tap4j.model.TestSet;
 def makeTest(testParam) {
 	String tearDownCmd = "$RESOLVED_MAKE; \$MAKE -f ./aqa-tests/TKG/testEnv.mk testEnvTeardown"
 	// Note: keyword source cannot be used in Jenkins script. Therefore, using "." instead.
-	String makeTestCmd = "$RESOLVED_MAKE;cd ./aqa-tests; . ./scripts/testenv/testenvSettings.sh;cd ./TKG; \$MAKE $testParam"
+    // When DYNAMIC_COMPILE=false, do not source testenvSettings.sh (to avoid calling it twice). Only
+    // source the settings when env.DYNAMIC_COMPILE is true.
+	String makeTestCmd = "$RESOLVED_MAKE;cd ./aqa-tests/TKG; \$MAKE $testParam"
+	if (env.DYNAMIC_COMPILE) {
+		makeTestCmd = "$RESOLVED_MAKE;cd ./aqa-tests; . ./scripts/testenv/testenvSettings.sh;cd ./TKG; \$MAKE $testParam"
+	}
 	//unset LD_LIBRARY_PATH workaround for issue https://github.com/adoptium/infrastructure/issues/2934
 	if (JDK_IMPL == 'hotspot' && PLATFORM.contains('alpine-linux')) {
 		makeTestCmd = "unset LD_LIBRARY_PATH; $makeTestCmd"
@@ -105,8 +110,14 @@ def setupEnv() {
 	env.EXIT_FAILURE = params.EXIT_FAILURE ? params.EXIT_FAILURE : false
 	env.EXIT_SUCCESS = params.EXIT_SUCCESS ? params.EXIT_SUCCESS : false
 	NUM_MACHINES = params.NUM_MACHINES ? params.NUM_MACHINES.toInteger() : 1
-	env.LIB_DIR = JOB_NAME.contains("SmokeTests") ? "${WORKSPACE}/../../../../../externalDependency/lib" : "${WORKSPACE}/../../externalDependency/lib"
-	env.SYSTEM_LIB_DIR = JOB_NAME.contains("SmokeTests") ? "${WORKSPACE}/../../../../../externalDependency/system_lib" : "${WORKSPACE}/../../externalDependency/system_lib"
+	if (CLOUD_PROVIDER == 'azure') {
+		// Needs to be inside the workspace as the docker container won't have permissions to write to higher level directories
+		env.LIB_DIR = "${WORKSPACE}/externalDependency/lib"
+		env.SYSTEM_LIB_DIR = "${WORKSPACE}/externalDependency/system_lib"
+	} else {
+		env.LIB_DIR = JOB_NAME.contains("SmokeTests") ? "${WORKSPACE}/../../../../../externalDependency/lib" : "${WORKSPACE}/../../externalDependency/lib"
+		env.SYSTEM_LIB_DIR = JOB_NAME.contains("SmokeTests") ? "${WORKSPACE}/../../../../../externalDependency/system_lib" : "${WORKSPACE}/../../externalDependency/system_lib"
+	}
 	env.OPENJCEPLUS_GIT_REPO = params.OPENJCEPLUS_GIT_REPO ?: "https://github.com/ibmruntimes/OpenJCEPlus.git"
 	env.OPENJCEPLUS_GIT_BRANCH = params.OPENJCEPLUS_GIT_BRANCH ?: "semeru-java${params.JDK_VERSION}"
 	env.PARALLEL = env.PARALLEL ? params.PARALLEL : "None"
@@ -802,9 +813,20 @@ def runTest( ) {
 		}
 		for (int i = 1; i <= ITERATIONS; i++) {
 			echo "ITERATION: ${i}/${ITERATIONS}"
-			if (env.SPEC.contains('linux') && !(LABEL.contains('ci.agent.dynamic') && CLOUD_PROVIDER == 'azure') && (BUILD_LIST != "external")) {
+			if (env.SPEC.contains('linux') && (BUILD_LIST != "external")) {
 				// Detect if Xvfb is on the machine, and if not use the wayland startup code (Initially for EL10)
 				if ( sh(script:"which Xvfb 2>&1", returnStatus:true) != 0 ) {
+					// XDG_RUNTIME_DIR is limited to 108 chars, so create a short tmp symlink
+					def tmp_wayland = sh(script: 'echo wayland-$(id -u)', returnStdout: true).trim()
+					echo "Creating temporary wayland path and symlink /tmp/${tmp_wayland}"
+					sh "rm -rf /tmp/${tmp_wayland} && mkdir -pm 0700 /tmp/${tmp_wayland}"
+
+					sh "mkdir -pm 0700 " + env.WORKSPACE + "/.xdg-runtime"
+
+					// symlink tmp XDG path to workspace path
+					env.XDG_RUNTIME_DIR = "/tmp/${tmp_wayland}"
+					sh "ln -sfn " + env.XDG_RUNTIME_DIR + " " + env.WORKSPACE + "/.xdg-runtime"
+
 					sh "mkdir -p -m 1777 /tmp/.X11-unix"
 					sh "weston --no-config --socket=wayland-vfb --backend=headless-backend.so --xwayland &"
 					env.DISPLAY = ":0"
@@ -1369,6 +1391,8 @@ def getFailedAndCustomizedTest(String paths="") {
 	def jckRuntimeFailedTestCaseList = ""
 	def jckCompilerFailedTestCaseList = ""
 	def jckDevtoolsFailedTestCaseList = ""
+	def jckInteractiveAWTFailedTestCaseList = ""
+	def jckInteractiveSwingFailedTestCaseList = ""
 	List<String> buildPaths = paths.split(',')
 	for (def buildPath: buildPaths) {
 		def tapFiles = findFiles(glob: "${buildPath}**/*.tap")
@@ -1397,6 +1421,10 @@ def getFailedAndCustomizedTest(String paths="") {
 								jckDevtoolsFailedTestCaseList = mergeTestCasesWithoutDup(jckDevtoolsFailedTestCaseList, failedTestCasesInfo)
 							} else if (failedtest.startsWith("langtools_")){
 								langtoolsFailedTestCaseList = mergeTestCasesWithoutDup(langtoolsFailedTestCaseList, failedTestCasesInfo)
+							} else if (failedtest.startsWith("jckinteractives_java_awt") || failedtest.startsWith("jckinteractivesawt") ) {
+								jckInteractiveAWTFailedTestCaseList = mergeTestCasesWithoutDup(jckInteractiveAWTFailedTestCaseList, failedTestCasesInfo)
+							} else if (failedtest.startsWith("jckinteractives_javax_swing") || failedtest.startsWith("jckinteractivesswing") ) {
+								jckInteractiveSwingFailedTestCaseList = mergeTestCasesWithoutDup(jckInteractiveSwingFailedTestCaseList, failedTestCasesInfo)
 							} else {
 								hotspotFailedTestCaseList = mergeTestCasesWithoutDup(hotspotFailedTestCaseList, failedTestCasesInfo)
 							}
@@ -1428,6 +1456,12 @@ def getFailedAndCustomizedTest(String paths="") {
 		}
 		if (jckDevtoolsFailedTestCaseList) {
 			customizedTestCases['jckdevtools'] = "${jckDevtoolsFailedTestCaseList}"
+		}
+		if (jckInteractiveAWTFailedTestCaseList) {
+			customizedTestCases['jckinteractivesawt'] = "${jckInteractiveAWTFailedTestCaseList}"
+		}
+		if (jckInteractiveSwingFailedTestCaseList) {
+			customizedTestCases['jckinteractivesswing'] = "${jckInteractiveSwingFailedTestCaseList}"
 		}
 		if (customizedTestCases.size() == 1) {
 			def testCases=customizedTestCases.values().first()
@@ -1642,8 +1676,7 @@ def archiveChildJobTap(childJobs, originalStatus = 'SUCCESS') {
 			sortByProjectName(jobList)
 			jobList.each {
 				cjob ->
-					def jobInvocation = cjob.getRawBuild()
-					def buildId = jobInvocation.getNumber()
+					def buildId = cjob.getNumber()
 					def name = cjob.getProjectName()
 					def childResult = cjob.getCurrentResult()
 					echo "${name} #${buildId} completed with status ${childResult}"

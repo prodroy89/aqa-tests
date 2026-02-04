@@ -178,9 +178,6 @@
 		<testCaseName>dacapo-tomcat</testCaseName>
 		<command>$(JAVA_COMMAND) $(JVM_OPTIONS) -jar $(Q)$(TEST_RESROOT)$(D)dacapo.jar$(Q) tomcat; \
 		$(TEST_STATUS)</command>
-		<versions>
-    			<version>11+</version>
-		</versions>
 		<levels>
 			<level>extended</level>
 		</levels>

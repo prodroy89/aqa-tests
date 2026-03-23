@@ -62,7 +62,7 @@ ifeq ($(OS),FreeBSD)
 endif
 ifeq ($(CYGWIN),1)
  	NPROCS:=$(NUMBER_OF_PROCESSORS)
-	MEMORY_SIZE:=$(shell powershell -command "(Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1024 / 1024")
+	MEMORY_SIZE:=$(shell powershell -command "[int]((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1024 / 1024)")
 endif
 ifeq ($(OS),SunOS)	
 	NPROCS:=$(shell psrinfo | wc -l)
@@ -76,7 +76,7 @@ endif
 MEM := $(shell expr $(MEMORY_SIZE) / 2048)
 CORE := $(shell expr $(NPROCS) / 2 + 1)
 CONC := $(CORE)
-ifeq ($(shell expr $(CORE) \> $(MEM)), 1)
+ifeq ($(shell test $(CORE) -gt $(MEM) && echo 1 || echo 0), 1)
 	CONC := $(MEM)
 endif
 # Can't determine cores on zOS, use a reasonable default
@@ -180,6 +180,8 @@ FULLPATH_LANGTOOLS_CUSTOM_TARGET = $(foreach target,$(LANGTOOLS_CUSTOM_TARGET),$
 
 JDK_NATIVE_OPTIONS :=
 JVM_NATIVE_OPTIONS :=
+# Use for J9 tests that require hotspot native images
+JVM_NATIVE_OPTIONS_HOTSPOT_FOR_J9 :=
 
 ifneq ($(JDK_VERSION),8)
 	ifdef TESTIMAGE_PATH
@@ -189,6 +191,10 @@ ifneq ($(JDK_VERSION),8)
 		# else if JDK_IMPL is openj9 or ibm
 		else ifneq ($(filter openj9 ibm, $(JDK_IMPL)),)
 			JVM_NATIVE_OPTIONS := -nativepath:"$(TESTIMAGE_PATH)$(D)openj9"
+			JVM_NATIVE_OPTIONS_HOTSPOT_FOR_J9 := -nativepath:"$(TESTIMAGE_PATH)$(D)hotspot$(D)jtreg$(D)native"
+			ifeq ($(OS),OS/390)
+			  ZOS_ONLY_NATIVE_LIBPATH := -e LIBPATH=$(TESTIMAGE_PATH)$(D)hotspot$(D)jtreg$(D)native
+			endif
 		endif
 	endif
 endif

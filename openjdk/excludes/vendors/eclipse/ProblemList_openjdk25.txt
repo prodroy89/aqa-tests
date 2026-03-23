@@ -27,6 +27,7 @@ runtime/cds/TestDefaultArchiveLoading.java#nocoops_nocoh https://github.com/adop
 runtime/cds/appcds/complexURI/ComplexURITest.java https://github.com/adoptium/adoptium-support/issues/937 macosx-x64
 runtime/cds/appcds/TransformInterfaceOfLambda.java https://github.com/adoptium/adoptium-support/issues/937 macosx-x64
 runtime/cds/NonJVMVariantLocation.java  https://github.com/adoptium/adoptium-support/issues/937 macosx-x64
+
 ############################################################################
 
 # jdk_awt

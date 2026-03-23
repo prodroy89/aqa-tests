@@ -40,7 +40,6 @@ java/beans/XMLEncoder/java_awt_ScrollPane.java https://github.com/eclipse-openj9
 java/lang/annotation/AnnotationsInheritanceOrderRedefinitionTest.java https://github.com/adoptium/aqa-tests/issues/1297 generic-all
 java/lang/annotation/loaderLeak/Main.java https://github.com/eclipse-openj9/openj9/issues/6701 generic-all
 java/lang/annotation/LoaderLeakTest.java https://github.com/eclipse-openj9/openj9/issues/13201 generic-all
-java/lang/Class/getEnclosingMethod/BadEnclosingMethodTest.java https://github.com/eclipse-openj9/openj9/issues/21732 generic-all
 java/lang/Class/GetModuleTest.java https://github.com/adoptium/aqa-tests/issues/1297 generic-all
 java/lang/ClassLoader/Assert.java https://github.com/eclipse-openj9/openj9/issues/6668 macosx-x64
 java/lang/ClassLoader/EndorsedDirs.java https://github.com/eclipse-openj9/openj9/issues/3055 generic-all
@@ -48,6 +47,7 @@ java/lang/ClassLoader/ExtDirs.java https://github.com/eclipse-openj9/openj9/issu
 java/lang/ClassLoader/LibraryPathProperty.java https://github.com/adoptium/aqa-tests/issues/1297 generic-all
 java/lang/ClassLoader/nativeLibrary/NativeLibraryTest.java https://github.com/eclipse-openj9/openj9/issues/14441 aix-all
 java/lang/ClassLoader/RecursiveSystemLoader.java https://github.com/eclipse-openj9/openj9/issues/3178 generic-all
+java/lang/constant/MethodTypeDescTest.java https://github.com/eclipse-openj9/openj9/issues/23494 generic-all
 java/lang/Enum/ConstantDirectoryOptimalCapacity.java https://github.com/adoptium/aqa-tests/issues/1297 generic-all
 java/lang/invoke/condy/CondyNestedResolutionTest.java https://github.com/eclipse-openj9/openj9/issues/7158 aix-all
 java/lang/invoke/condy/CondyNestedTest.java https://github.com/eclipse-openj9/openj9/issues/4127 linux-ppc64le
@@ -129,7 +129,7 @@ java/lang/Thread/SleepSanity.java https://github.com/eclipse-openj9/openj9/issue
 java/lang/Thread/ThreadSleepEvent.java https://github.com/eclipse-openj9/openj9/issues/20166 generic-all
 java/lang/Thread/UncaughtExceptions.sh https://github.com/eclipse-openj9/openj9/issues/6690 generic-all
 java/lang/Thread/jni/AttachCurrentThread/AttachTest.java#id1 https://github.com/eclipse-openj9/openj9/issues/17399 generic-all
-java/lang/Thread/virtual/Collectable.java https://github.com/eclipse-openj9/openj9/issues/18463 windows-all
+java/lang/Thread/virtual/Collectable.java https://github.com/eclipse-openj9/openj9/issues/18463 linux-aarch64,linux-x64,windows-all
 java/lang/Thread/virtual/JfrEvents.java https://github.com/eclipse-openj9/openj9/issues/20166 generic-all
 java/lang/Thread/virtual/KlassInit.java#default https://github.com/eclipse-openj9/openj9/issues/22936 generic-all
 java/lang/Thread/virtual/KlassInit.java#Xcomp https://github.com/eclipse-openj9/openj9/issues/22936 generic-all
@@ -145,22 +145,24 @@ java/lang/Thread/virtual/stress/Skynet100kWithMonitors.java#id0 https://github.c
 java/lang/Thread/virtual/stress/TimedGet.java https://github.com/eclipse-openj9/openj9/issues/15184 macosx-x64
 java/lang/ThreadGroup/SetMaxPriority.java https://github.com/eclipse-openj9/openj9/issues/6691 generic-all
 java/lang/Throwable/SuppressedExceptions.java https://github.com/eclipse-openj9/openj9/issues/6692 generic-all
+jdk/modules/etc/JmodExcludedFiles.java https://github.com/eclipse-openj9/openj9/issues/23124 generic-all
 jni/nullCaller/NullCallerTest.java https://github.com/eclipse-openj9/openj9/issues/15370 linux-ppc64le,macosx-all
 
 ############################################################################
 
 # jdk_internal
-jdk/internal/loader/NativeLibraries/Main.java  https://github.com/eclipse-openj9/openj9/issues/9018  generic-all
+
+jdk/internal/loader/NativeLibraries/Main.java https://github.com/eclipse-openj9/openj9/issues/9018 generic-all
 jdk/internal/reflect/Reflection/GetCallerClassTest.java#id2 https://github.com/eclipse-openj9/openj9/issues/14097 generic-all
 jdk/internal/reflect/Reflection/GetCallerClassTest.java#id3 https://github.com/eclipse-openj9/openj9/issues/14097 generic-all
-jdk/internal/vm/Continuation/MovingCompWindow.java https://github.com/adoptium/aqa-tests/issues/1297 generic-all
-jdk/internal/loader/NativeLibraries/Main.java https://github.com/adoptium/aqa-tests/issues/1920 generic-all
 jdk/internal/vm/Continuation/Basic.java#id0 https://github.com/eclipse-openj9/openj9/issues/15163 generic-all
 jdk/internal/vm/Continuation/Basic.java#id1 https://github.com/eclipse-openj9/openj9/issues/15163 generic-all
 jdk/internal/vm/Continuation/ClassUnloading.java https://github.com/eclipse-openj9/openj9/issues/15152 generic-all
 jdk/internal/vm/Continuation/Fuzz.java https://github.com/eclipse-openj9/openj9/issues/15247 generic-all
 jdk/internal/vm/Continuation/LiveFramesDriver.java https://github.com/eclipse-openj9/openj9/issues/15152 generic-all
+jdk/internal/vm/Continuation/MovingCompWindow.java https://github.com/adoptium/aqa-tests/issues/1297 generic-all
 jdk/internal/vm/Continuation/OSRTest.java https://github.com/eclipse-openj9/openj9/issues/19357 generic-all
+jdk/internal/vm/Continuation/OSRWithManyLocals.java https://github.com/eclipse-openj9/openj9/issues/22871 generic-all
 jdk/internal/vm/Continuation/Scoped.java https://github.com/eclipse-openj9/openj9/issues/15163 generic-all
 
 ############################################################################
@@ -470,7 +472,7 @@ java/time/test/java/time/TestClock_System.java https://github.com/eclipse-openj9
 java/util/Arrays/largeMemory/ParallelPrefix.java https://github.com/eclipse-openj9/openj9/issues/4100 linux-ppc64le
 java/util/Arrays/TimSortStackSize2.java https://github.com/eclipse-openj9/openj9/issues/7086 generic-all
 java/util/BitSet/stream/BitSetStreamTest.java https://github.com/eclipse-openj9/openj9/issues/4720 linux-all
-java/util/concurrent/Executors/UnreferencedExecutor.java https://github.com/eclipse-openj9/openj9/issues/22665 aix-all
+java/util/concurrent/ArrayBlockingQueue/WhiteBox.java https://github.com/eclipse-openj9/openj9/issues/19047 generic-all
 java/util/concurrent/forkjoin/FJExceptionTableLeak.java https://github.com/eclipse-openj9/openj9/issues/3209 generic-all
 java/util/concurrent/locks/Lock/TimedAcquireLeak.java https://github.com/eclipse-openj9/openj9/issues/7125 macosx-all,linux-all,aix-all
 java/util/concurrent/locks/Lock/OOMEInAQS.java https://github.com/eclipse-openj9/openj9/issues/16659 generic-all
@@ -486,6 +488,7 @@ java/util/Spliterator/SpliteratorCollisions.java https://github.com/eclipse-open
 java/util/stream/boottest/java.base/java/util/stream/NodeTest.java https://github.com/eclipse-openj9/openj9/issues/4129 macosx-all
 java/util/stream/test/org/openjdk/tests/java/util/SplittableRandomTest.java https://github.com/eclipse-openj9/openj9/issues/4613 generic-all
 java/util/stream/test/org/openjdk/tests/java/util/stream/ToArrayOpTest.java https://github.com/eclipse-openj9/openj9/issues/3447 generic-all
+java/util/StringJoiner/StringJoinerTest.java https://github.com/eclipse-openj9/openj9/issues/18708 generic-all
 java/util/WeakHashMap/GCDuringIteration.java https://github.com/adoptium/aqa-tests/issues/1297 generic-all
 java/util/zip/CloseInflaterDeflaterTest.java	https://github.com/eclipse-openj9/openj9/issues/14948	linux-s390x
 java/util/zip/DeflateIn_InflateOut.java https://github.com/eclipse-openj9/openj9/issues/21054 linux-s390x
@@ -537,7 +540,6 @@ vm/verifier/VerifyProtectedConstructor.java https://github.com/eclipse-openj9/op
 
 # jdk_foreign
 
-java/foreign/sharedclosejvmti/TestSharedCloseJvmti.java https://github.com/eclipse-openj9/openj9/issues/22934 generic-all
 java/foreign/stackwalk/TestAsyncStackWalk.java#default_gc https://github.com/eclipse-openj9/openj9/issues/13993 generic-all
 java/foreign/stackwalk/TestAsyncStackWalk.java#shenandoah https://github.com/eclipse-openj9/openj9/issues/13993 generic-all
 java/foreign/stackwalk/TestAsyncStackWalk.java#zgc https://github.com/eclipse-openj9/openj9/issues/13993 generic-all
@@ -547,6 +549,7 @@ java/foreign/stackwalk/TestStackWalk.java#shenandoah https://github.com/eclipse-
 java/foreign/stackwalk/TestStackWalk.java#zgc https://github.com/eclipse-openj9/openj9/issues/13993 generic-all
 java/foreign/TestFallbackLookup.java https://github.com/adoptium/aqa-tests/issues/1297 z/OS-s390x
 java/foreign/TestIllegalLink.java https://github.com/eclipse-openj9/openj9/issues/14002 generic-all
+java/foreign/TestStringEncoding.java https://github.com/eclipse-openj9/openj9/issues/23494 generic-all
 java/foreign/TestUnsupportedPlatform.java https://github.com/eclipse-openj9/openj9/issues/14828 generic-all
 java/foreign/TestUpcallAsync.java https://github.com/eclipse-openj9/openj9/issues/22403 aix-all
 java/foreign/TestUpcallScope.java https://github.com/eclipse-openj9/openj9/issues/22403 aix-all
@@ -603,9 +606,11 @@ serviceability/jvmti/SuspendWithObjectMonitorEnter/SuspendWithObjectMonitorEnter
 serviceability/jvmti/VMObjectAlloc/VMObjectAllocTest.java https://github.com/eclipse-openj9/openj9/issues/15994 generic-all
 serviceability/jvmti/events/FieldAccess/fieldacc03/fieldacc03.java https://github.com/eclipse-openj9/openj9/issues/16218 generic-all
 serviceability/jvmti/events/FieldAccess/fieldacc04/fieldacc04.java https://github.com/eclipse-openj9/openj9/issues/16218 generic-all
+serviceability/jvmti/events/VMDeath/AllocatingInVMDeath/TestAllocatingInVMDeath.java https://github.com/eclipse-openj9/openj9/issues/23175 generic-all
 serviceability/jvmti/thread/GetStackTrace/getstacktr06/getstacktr06.java https://github.com/eclipse-openj9/openj9/issues/16238 generic-all
 serviceability/jvmti/thread/GetStackTrace/getstacktr08/getstacktr08.java https://github.com/eclipse-openj9/openj9/issues/16238 generic-all
 serviceability/jvmti/vthread/MethodExitTest/MethodExitTest.java https://github.com/adoptium/aqa-tests/issues/1297 generic-all
+serviceability/jvmti/vthread/SingleStepKlassInit/SingleStepKlassInit.java https://github.com/eclipse-openj9/openj9/issues/22936 generic-all
 serviceability/jvmti/vthread/VThreadTest/VThreadTest.java https://github.com/eclipse-openj9/openj9/issues/15920 generic-all
 serviceability/jvmti/vthread/WaitNotifySuspendedVThreadTest/WaitNotifySuspendedVThreadTest.java https://github.com/eclipse-openj9/openj9/issues/16689 generic-all
 serviceability/jvmti/vthread/ContinuationTest/ContinuationTest.java https://github.com/adoptium/aqa-tests/issues/1297 generic-all

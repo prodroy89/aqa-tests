@@ -48,6 +48,7 @@ java/lang/ClassLoader/ExtDirs.java https://github.com/eclipse-openj9/openj9/issu
 java/lang/ClassLoader/LibraryPathProperty.java https://github.com/adoptium/aqa-tests/issues/1297 generic-all
 java/lang/ClassLoader/nativeLibrary/NativeLibraryTest.java https://github.com/eclipse-openj9/openj9/issues/14441 aix-all
 java/lang/ClassLoader/RecursiveSystemLoader.java https://github.com/eclipse-openj9/openj9/issues/3178 generic-all
+java/lang/constant/MethodTypeDescTest.java https://github.com/eclipse-openj9/openj9/issues/23494 generic-all
 java/lang/Enum/ConstantDirectoryOptimalCapacity.java https://github.com/adoptium/aqa-tests/issues/1297 generic-all
 java/lang/invoke/condy/CondyNestedResolutionTest.java https://github.com/eclipse-openj9/openj9/issues/7158 aix-all
 java/lang/invoke/condy/CondyNestedTest.java https://github.com/eclipse-openj9/openj9/issues/4127 linux-ppc64le
@@ -79,6 +80,7 @@ java/lang/ProcessBuilder/checkHandles/CheckHandles.java https://github.com/adopt
 java/lang/ProcessBuilder/SkipTest.java https://github.com/eclipse-openj9/openj9/issues/4124 windows-all
 java/lang/ProcessHandle/InfoTest.java https://github.com/eclipse-openj9/openj9/issues/19757 aix-ppc64
 java/lang/ProcessHandle/TreeTest.java https://github.com/eclipse-openj9/openj9/issues/10569 windows-all,aix-all
+java/lang/SecurityManager/CheckSecurityProvider.java https://github.com/eclipse-openj9/openj9/issues/23389 generic-all
 java/lang/ref/CleanerTest.java https://github.com/adoptium/aqa-tests/issues/1297 generic-all
 java/lang/ref/EarlyTimeout.java https://github.com/eclipse-openj9/openj9/issues/7225 generic-all
 java/lang/ref/FinalizeOverride.java https://github.com/eclipse-openj9/openj9/issues/9651 generic-all
@@ -111,6 +113,7 @@ java/lang/String/EqualsIgnoreCase.java https://github.com/eclipse-openj9/openj9/
 java/lang/String/UnicodeCasingTest.java https://github.com/eclipse-openj9/openj9/issues/4597 linux-s390x
 java/lang/StringBuffer/HugeCapacity.java https://github.com/adoptium/aqa-tests/issues/1297 generic-all
 java/lang/StringBuilder/HugeCapacity.java https://github.com/adoptium/aqa-tests/issues/1297 generic-all
+java/lang/StringBuilder/RacingSBThreads.java https://github.com/eclipse-openj9/openj9/issues/23353 generic-all
 java/lang/System/Logger/custom/CustomLoggerTest.java https://github.com/eclipse-openj9/openj9/issues/6674 generic-all
 java/lang/System/Logger/default/DefaultLoggerTest.java https://github.com/eclipse-openj9/openj9/issues/6674 generic-all
 java/lang/System/LoggerFinder/BaseLoggerFinderTest/BaseLoggerFinderTest.java https://github.com/eclipse-openj9/openj9/issues/6674 generic-all
@@ -124,7 +127,7 @@ java/lang/System/LoggerFinder/jdk/DefaultLoggerBridgeTest/DefaultLoggerBridgeTes
 java/lang/Thread/SleepSanity.java https://github.com/eclipse-openj9/openj9/issues/17638 windows-all
 java/lang/Thread/ThreadSleepEvent.java https://github.com/eclipse-openj9/openj9/issues/20166 generic-all
 java/lang/Thread/UncaughtExceptions.sh https://github.com/eclipse-openj9/openj9/issues/6690 generic-all
-java/lang/Thread/virtual/Collectable.java https://github.com/eclipse-openj9/openj9/issues/18463 linux-x64,windows-all
+java/lang/Thread/virtual/Collectable.java https://github.com/eclipse-openj9/openj9/issues/18463 linux-aarch64,linux-x64,windows-all
 java/lang/Thread/virtual/JfrEvents.java https://github.com/eclipse-openj9/openj9/issues/20166 generic-all
 java/lang/Thread/virtual/StackTraces.java https://github.com/eclipse-openj9/openj9/issues/16045 generic-all
 java/lang/Thread/virtual/stress/GetStackTraceALotWhenPinned.java#id0 https://github.com/eclipse-openj9/openj9/issues/18908 linux-s390x
@@ -248,7 +251,7 @@ javax/imageio/plugins/jpeg/JPEGsNotAcceleratedTest.java https://github.com/eclip
 # jdk_io
 
 java/io/CharArrayReader/OverflowInRead.java https://github.com/adoptium/aqa-tests/issues/1500 generic-all
-#java/io/File/GetXSpace.java https://bugs.openjdk.org/browse/JDK-8251017 linux-arm, aix-all
+#java/io/File/GetXSpace.java https://bugs.openjdk.org/browse/JDK-8251017 linux-arm,aix-all
 java/io/File/GetXSpace.java https://bugs.openjdk.java.net/browse/JDK-8251466 windows-all,linux-arm,aix-all
 java/io/FileInputStream/UnreferencedFISClosesFd.java  https://github.com/eclipse-openj9/openj9/issues/3543 generic-all
 java/io/FileOutputStream/UnreferencedFOSClosesFd.java https://github.com/eclipse-openj9/openj9/issues/3543 generic-all
@@ -474,7 +477,7 @@ java/time/test/java/time/TestClock_System.java https://github.com/eclipse-openj9
 java/util/Arrays/largeMemory/ParallelPrefix.java https://github.com/eclipse-openj9/openj9/issues/4100 linux-ppc64le
 java/util/Arrays/TimSortStackSize2.java https://github.com/eclipse-openj9/openj9/issues/7086 generic-all
 java/util/BitSet/stream/BitSetStreamTest.java https://github.com/eclipse-openj9/openj9/issues/4720 linux-all
-java/util/concurrent/Executors/UnreferencedExecutor.java https://github.com/eclipse-openj9/openj9/issues/22665 aix-all
+java/util/concurrent/ArrayBlockingQueue/WhiteBox.java https://github.com/eclipse-openj9/openj9/issues/19047 generic-all
 java/util/concurrent/forkjoin/FJExceptionTableLeak.java https://github.com/eclipse-openj9/openj9/issues/3209 generic-all
 java/util/concurrent/locks/Lock/TimedAcquireLeak.java https://github.com/eclipse-openj9/openj9/issues/7125 macosx-all,linux-all,aix-all
 java/util/concurrent/locks/Lock/OOMEInAQS.java https://github.com/eclipse-openj9/openj9/issues/16659 generic-all
@@ -541,6 +544,7 @@ java/foreign/TestFallbackLookup.java https://github.com/adoptium/aqa-tests/issue
 java/foreign/TestHandshake.java https://github.com/eclipse-openj9/openj9/issues/13211 generic-all
 java/foreign/TestHFA.java https://github.com/eclipse-openj9/openj9/issues/17953 linux-ppc64le
 java/foreign/TestIllegalLink.java https://github.com/eclipse-openj9/openj9/issues/14002 generic-all
+java/foreign/TestStringEncoding.java https://github.com/eclipse-openj9/openj9/issues/23494 generic-all
 java/foreign/TestUnsupportedPlatform.java https://github.com/eclipse-openj9/openj9/issues/14828 generic-all
 java/foreign/TestUpcallAsync.java https://github.com/eclipse-openj9/openj9/issues/22403 aix-all
 java/foreign/TestUpcallScope.java https://github.com/eclipse-openj9/openj9/issues/22403 aix-all

@@ -53,6 +53,7 @@ java/lang/ProcessBuilder/Basic.java		https://github.com/eclipse-openj9/openj9/is
 java/lang/ProcessBuilder/PipelineLeaksFD.java https://github.com/eclipse-openj9/openj9/issues/19728 linux-s390x
 java/lang/ProcessBuilder/SkipTest.java https://github.com/eclipse-openj9/openj9/issues/4124 windows-all
 java/lang/ProcessHandle/TreeTest.java https://github.com/eclipse-openj9/openj9/issues/10569 windows-all,aix-all
+java/lang/SecurityManager/CheckSecurityProvider.java https://github.com/eclipse-openj9/openj9/issues/23389 generic-all
 java/lang/StackTraceElement/PublicConstructor.java	https://github.com/eclipse-openj9/openj9/issues/6659	generic-all
 java/lang/StackTraceElement/SerialTest.java	https://github.com/eclipse-openj9/openj9/issues/6659	generic-all
 java/lang/StackWalker/Basic.java		https://github.com/eclipse-openj9/openj9/issues/6698	generic-all
@@ -225,7 +226,7 @@ javax/imageio/plugins/shared/ImageWriterCompressionTest.java https://github.com/
 # jdk_io
 
 java/io/CharArrayReader/OverflowInRead.java	https://github.com/adoptium/aqa-tests/issues/1500	generic-all
-#java/io/File/GetXSpace.java https://bugs.openjdk.org/browse/JDK-8251017 linux-arm, aix-all
+#java/io/File/GetXSpace.java https://bugs.openjdk.org/browse/JDK-8251017 linux-arm,aix-all
 java/io/File/GetXSpace.java https://bugs.openjdk.java.net/browse/JDK-8251466 windows-all,linux-arm,aix-all
 java/io/FileInputStream/UnreferencedFISClosesFd.java  https://github.com/eclipse-openj9/openj9/issues/3543 generic-all
 java/io/FileOutputStream/UnreferencedFOSClosesFd.java https://github.com/eclipse-openj9/openj9/issues/3543 generic-all
@@ -350,6 +351,7 @@ sun/security/rsa/pss/SignatureTestPSS.java	https://github.ibm.com/runtimes/backl
 sun/security/ssl/CipherSuite/DisabledCurve.java	https://github.ibm.com/runtimes/backlog/issues/795	aix-all,windows-all,z/OS-s390x
 sun/security/ssl/CipherSuite/NamedGroupsWithCipherSuite.java	https://github.ibm.com/runtimes/backlog/issues/795	aix-all,windows-all
 sun/security/ssl/CipherSuite/SupportedGroups.java	https://github.ibm.com/runtimes/backlog/issues/795	aix-all,windows-all
+sun/security/ssl/X509KeyManager/PreferredKey.java https://github.com/eclipse-openj9/openj9/issues/23990 generic-all
 sun/security/ssl/X509TrustManagerImpl/distrust/Camerfirma.java https://github.com/eclipse-openj9/openj9/issues/21235 generic-all
 sun/security/ssl/X509TrustManagerImpl/distrust/Entrust.java https://github.com/adoptium/aqa-tests/issues/3976 generic-all
 sun/security/ssl/X509TrustManagerImpl/distrust/Symantec.java	https://github.com/eclipse-openj9/openj9/issues/16312	generic-all
@@ -358,9 +360,10 @@ sun/security/tools/jarsigner/PreserveRawManifestEntryAndDigest.java	https://gith
 
 ########################################################################################################################################################
 
-# jdk_security_4
+# jdk_security4
 
 sun/security/krb5/auto/NoAddresses.java https://github.com/adoptium/aqa-tests/issues/4566 z/OS-s390x
+sun/security/krb5/auto/UserIterCount.java https://github.com/eclipse-openj9/openj9/issues/23873 generic-all
 
 ######################################################################################################
 
@@ -401,6 +404,7 @@ java/util/Arrays/TimSortStackSize2.java	https://github.com/eclipse-openj9/openj9
 java/util/Arrays/largeMemory/ParallelPrefix.java https://github.com/eclipse-openj9/openj9/issues/4100 linux-ppc64le
 java/util/BitSet/stream/BitSetStreamTest.java https://github.com/eclipse-openj9/openj9/issues/4720 linux-all
 java/util/Spliterator/SpliteratorCollisions.java	https://github.com/eclipse-openj9/openj9/issues/7090	generic-all
+java/util/concurrent/ArrayBlockingQueue/WhiteBox.java https://github.com/eclipse-openj9/openj9/issues/19047 generic-all
 java/util/concurrent/forkjoin/FJExceptionTableLeak.java	https://github.com/eclipse-openj9/openj9/issues/3209	generic-all
 java/util/concurrent/locks/Lock/TimedAcquireLeak.java	https://github.com/eclipse-openj9/openj9/issues/7125	macosx-all,linux-all,aix-all
 java/util/concurrent/TimeUnit/Basic.java https://github.com/adoptium/aqa-tests/issues/1665 windows-all

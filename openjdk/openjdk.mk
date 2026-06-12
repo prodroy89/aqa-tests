@@ -62,7 +62,7 @@ ifeq ($(OS),FreeBSD)
 endif
 ifeq ($(CYGWIN),1)
  	NPROCS:=$(NUMBER_OF_PROCESSORS)
-	MEMORY_SIZE:=$(shell powershell -command "(Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1024 / 1024")
+	MEMORY_SIZE:=$(shell powershell -command "[int]((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1024 / 1024)")
 endif
 ifeq ($(OS),SunOS)	
 	NPROCS:=$(shell psrinfo | wc -l)
@@ -76,7 +76,7 @@ endif
 MEM := $(shell expr $(MEMORY_SIZE) / 2048)
 CORE := $(shell expr $(NPROCS) / 2 + 1)
 CONC := $(CORE)
-ifeq ($(shell expr $(CORE) \> $(MEM)), 1)
+ifeq ($(shell test $(CORE) -gt $(MEM) && echo 1 || echo 0), 1)
 	CONC := $(MEM)
 endif
 # Can't determine cores on zOS, use a reasonable default
@@ -143,11 +143,6 @@ JTREG_BASIC_OPTIONS += $(JTREG_KEY_OPTIONS)
 JTREG_BASIC_OPTIONS_WO_EXTRA_OPTS := $(JTREG_BASIC_OPTIONS)
 JTREG_BASIC_OPTIONS += $(EXTRA_JTREG_OPTIONS)
 
-# Add APPLICATION_OPTIONS to pass options directly to jtreg (not through vmoptions)
-ifdef APPLICATION_OPTIONS
-    JTREG_BASIC_OPTIONS += $(APPLICATION_OPTIONS)
-endif
-
 # add another new parameter for concurrency
 SPECIAL_CONCURRENCY=$(EXTRA_JTREG_OPTIONS)
 # set SPECIAL_CONCURRENCY to 1 if the jdk is openj9 and the platform is linux_aarch64.
@@ -175,7 +170,7 @@ else
 endif
 
 JDK_CUSTOM_TARGET ?= java/math/BigInteger/BigIntegerTest.java
-HOTSPOT_CUSTOM_TARGET ?= gc/stress/gclocker/TestExcessGCLockerCollections.java
+HOTSPOT_CUSTOM_TARGET ?= gc/TestSystemGC.java
 HOTSPOT_CUSTOM_J9_TARGET ?= serviceability/jvmti/GetSystemProperty/JvmtiGetSystemPropertyTest.java
 LANGTOOLS_CUSTOM_TARGET ?= tools/javac/4241573/T4241573.java
 FULLPATH_JDK_CUSTOM_TARGET = $(foreach target,$(JDK_CUSTOM_TARGET),$(JTREG_JDK_TEST_DIR)$(D)$(target))
@@ -185,6 +180,8 @@ FULLPATH_LANGTOOLS_CUSTOM_TARGET = $(foreach target,$(LANGTOOLS_CUSTOM_TARGET),$
 
 JDK_NATIVE_OPTIONS :=
 JVM_NATIVE_OPTIONS :=
+# Use for J9 tests that require hotspot native images
+JVM_NATIVE_OPTIONS_HOTSPOT_FOR_J9 :=
 
 ifneq ($(JDK_VERSION),8)
 	ifdef TESTIMAGE_PATH
@@ -194,6 +191,10 @@ ifneq ($(JDK_VERSION),8)
 		# else if JDK_IMPL is openj9 or ibm
 		else ifneq ($(filter openj9 ibm, $(JDK_IMPL)),)
 			JVM_NATIVE_OPTIONS := -nativepath:"$(TESTIMAGE_PATH)$(D)openj9"
+			JVM_NATIVE_OPTIONS_HOTSPOT_FOR_J9 := -nativepath:"$(TESTIMAGE_PATH)$(D)hotspot$(D)jtreg$(D)native"
+			ifeq ($(OS),OS/390)
+			  ZOS_ONLY_NATIVE_LIBPATH := -e LIBPATH=$(TESTIMAGE_PATH)$(D)hotspot$(D)jtreg$(D)native
+			endif
 		endif
 	endif
 endif
@@ -212,9 +213,16 @@ TEST_VARIATION_JIT_PREVIEW:=
 TEST_VARIATION_JIT_AGGRESIVE:=
 TIMEOUT_HANDLER:=
 
-# if JDK_IMPL is openj9 or ibm
+# if JDK_IMPL is openj9 or ibm. 
+# When updating the PROBLEM_LIST_FILE for Project Valhalla also update it
+# in the build.xml dist target.
 ifneq ($(filter openj9 ibm, $(JDK_IMPL)),)
-	PROBLEM_LIST_FILE:=excludes/ProblemList_openjdk$(JDK_VERSION)-openj9.txt
+	ifneq ($(filter Valhalla, $(JDK_VERSION)),)
+		PROBLEM_LIST_FILE:=excludes/ProblemList_openjdk26-openj9.txt
+		PROBLEM_LIST_FILE_VALHALLA:=excludes/ProblemList_openjdkvalhalla-openj9.txt
+	else
+		PROBLEM_LIST_FILE:=excludes/ProblemList_openjdk$(JDK_VERSION)-openj9.txt
+	endif
 	PROBLEM_LIST_DEFAULT:=excludes/ProblemList_openjdk11-openj9.txt
 	TEST_VARIATION_DUMP:=-Xdump:system:none -Xdump:heap:none -Xdump:system:events=gpf+abort+traceassert+corruptcache
 	TEST_VARIATION_JIT_PREVIEW:=-XX:-JITServerTechPreviewMessage
@@ -247,8 +255,8 @@ else ifneq (,$(findstring OpenJCEPlus, $(TEST_FLAG)))
 	FEATURE_PROBLEM_LIST_FILE:=-exclude:$(Q)$(JTREG_JDK_TEST_DIR)$(D)ProblemList-OpenJCEPlus.txt$(Q)
 endif
 
-# If we are on alpine, also use the exclude file specific to alpine.
-ALPINE_PROBLEM_LIST_FILE:=$(TEST_ROOT)$(D)openjdk$(D)excludes$(D)alpine$(D)ProblemList_openjdk$(JDK_VERSION)_alpine.txt
+# If we are on alpine, we should also use the alpine-specific exclude file/s.
+ALPINE_PROBLEM_LIST_FILE:=$(TEST_ROOT)$(D)openjdk$(D)excludes$(D)alpine$(D)ProblemList_openjdk$(JDK_VERSION).txt
 ifneq (,$(findstring alpine, $(SPEC)))
 	ifneq (,$(realpath $(ALPINE_PROBLEM_LIST_FILE)))
 		ifeq (,$(FEATURE_PROBLEM_LIST_FILE))
@@ -263,8 +271,13 @@ ifneq (,$(findstring alpine, $(SPEC)))
 endif
 
 VENDOR_PROBLEM_LIST_FILE:=
-ifeq ($(JDK_VENDOR),$(filter $(JDK_VENDOR),redhat azul alibaba microsoft eclipse))
-	VENDOR_FILE:=excludes$(D)vendors$(D)$(JDK_VENDOR)$(D)ProblemList_openjdk$(JDK_VERSION).txt
+ifeq ($(JDK_VENDOR),$(filter $(JDK_VENDOR),redhat azul alibaba microsoft eclipse temurin))
+	# temurin is part of the eclipse foundation, so use the eclipse vendor exclude file
+	ifeq ($(JDK_VENDOR),temurin)
+		VENDOR_FILE:=excludes$(D)vendors$(D)eclipse$(D)ProblemList_openjdk$(JDK_VERSION).txt
+	else
+		VENDOR_FILE:=excludes$(D)vendors$(D)$(JDK_VENDOR)$(D)ProblemList_openjdk$(JDK_VERSION).txt
+	endif
 	ifneq (,$(wildcard $(VENDOR_FILE)))
 		VENDOR_PROBLEM_LIST_FILE:=-exclude:$(Q)$(TEST_ROOT)$(D)openjdk$(D)$(VENDOR_FILE)$(Q)
 	endif

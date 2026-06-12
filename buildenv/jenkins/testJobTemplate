@@ -244,11 +244,11 @@ ARCH_OS_LIST.each { ARCH_OS ->
 							}
 							stringParam('ADOPTOPENJDK_REPO', ADOPTOPENJDK_REPO, "AdoptOpenJDK git repo. Please use ssh for zos.")
 							stringParam('ADOPTOPENJDK_BRANCH', ADOPTOPENJDK_BRANCH, "AdoptOpenJDK branch")
-							stringParam('OPENJ9_REPO', OPENJ9_REPO, "OpenJ9 git repo. Please use ssh for zos.")
-							stringParam('OPENJ9_BRANCH', "master", "OpenJ9 branch")
+							stringParam('OPENJ9_REPO', OPENJ9_REPO, "OpenJ9 git repo. Please use ssh for zos. Ignored if USE_TESTENV_PROPERTIES is true")
+							stringParam('OPENJ9_BRANCH', "master", "OpenJ9 branch. Ignored if USE_TESTENV_PROPERTIES is true")
 							stringParam('OPENJ9_SHA', "", "OpenJ9 sha")
-							stringParam('JDK_REPO', JDK_REPO, "JDK git repo. Please use ssh for zos.")
-							stringParam('JDK_BRANCH', JDK_BRANCH, "JDK branch")
+							stringParam('JDK_REPO', JDK_REPO, "JDK git repo. Please use ssh for zos. Ignored if USE_TESTENV_PROPERTIES is true")
+							stringParam('JDK_BRANCH', JDK_BRANCH, "JDK branch.  Ignored if USE_TESTENV_PROPERTIES is true")
 							stringParam('OPENJDK_SHA', "", "OpenJDK SHA from which to run tests")
 							stringParam('TKG_OWNER_BRANCH', "adoptium:master", "TestKitGen git [owner]:[branch]. Default is adoptium:master")
 							stringParam('ADOPTOPENJDK_SYSTEMTEST_OWNER_BRANCH', "adoptium:master", "Personal Adoptium/aqa-systemtest repository owner:branch")
@@ -376,7 +376,7 @@ ARCH_OS_LIST.each { ARCH_OS ->
                                                                        a list of tests: testList TESTLIST=jit_jitt,jit_recognizedMethod_1,testSCCMLTests2_1<br/>
                                                                        Note: please do not use level, group or type (i.e., functional, sanity, etc) in the TESTLIST<br/>''')
 							stringParam('CUSTOM_TARGET', "",
-								'''Only used when the custom target is specified in TARGET , e.g. jdk_custom, langtools_custom, system_custom, etc., CUSTOM_TARGET=path to the test class to execute (typically ending in .java or .sh)<br>
+								'''Only used when the custom target is specified in TARGET , e.g. jdk_custom, langtools_custom, system_custom, etc., CUSTOM_TARGET=path to the test class to execute (typically ending in .java, .sh, or .html)<br>
 								Example 1:<br>
 								TARGET=system_custom<br>
 								CUSTOM_TARGET=-test=MathLoadTest -test-args="workload=math,timeLimit=5m"<br>
@@ -384,6 +384,15 @@ ARCH_OS_LIST.each { ARCH_OS ->
 								TARGET=jdk_custom (support multiple test cases separated by space, hotspot_custom works same<br>
 								CUSTOM_TARGET=test/jdk/java/math/BigInteger/LargeValueExceptions.java java/math/BigInteger/BigIntegerTest.java<br>
 								Example 3:<br>
+								TARGET=jckcompiler_custom<br>
+								CUSTOM_TARGET=api/javax_lang/xxxx/yyyy/zzzz/someTestCase.html<br>
+								Example 4:<br>
+								TARGET=jckinteractivesawt_custom<br>
+								CUSTOM_TARGET=api/java_awt/interactive/someTestCase.html<br>
+								Example 5:<br>
+								TARGET=jckinteractivesswing_custom<br>
+								CUSTOM_TARGET=api/javax_swing/interactive/someTestCase.html<br>
+								Example 6:<br>
 								TARGET=jckruntime_custom<br>
 								CUSTOM_TARGET=lang/INFR/....html<br>''')
 							parameterSeparatorDefinition {

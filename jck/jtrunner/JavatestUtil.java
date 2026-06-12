@@ -606,6 +606,10 @@ public class JavatestUtil {
 					generatedJti.setProperty("jck.env.runtime.testExecute.additionalClasspathRemote", pathToToolsJar);
 				}
 			}
+
+			if (jckVersionInt >= 26) {
+				generatedJti.setProperty("jck.env.runtime.refExecute.cmdAsString", riJavaForMultiJVMCompTest);
+			}
 			
 			if ( tests.startsWith("vm/jvmti") || tests.equals("vm") ) {
 				generatedJti.setProperty("jck.env.runtime.testExecute.jvmtiLivePhase", "Yes");
@@ -787,13 +791,22 @@ public class JavatestUtil {
 			}
 			
 			System.out.println("RI JDK Used: " + riJavaForMultiJVMCompTest);
-			generatedJti.setProperty("jck.env.compiler.compRefExecute." + cmdAsStringOrFile, riJavaForMultiJVMCompTest);
-
-			if (!jckVersion.contains("jck8") && (spec.contains("zos") || spec.contains("aix"))) {
-				// On jck11+ z/OS and AIX set the compRefExecute file and path separators
-				// due to JCK class OsHelper bug with getFileSep() in Compiler JCK Interviewer
-				generatedJti.setProperty("jck.env.compiler.compRefExecute.fileSep", "/");
-				generatedJti.setProperty("jck.env.compiler.compRefExecute.pathSep", ":");
+			if (jckVersionInt < 26) {
+				generatedJti.setProperty("jck.env.compiler.compRefExecute." + cmdAsStringOrFile, riJavaForMultiJVMCompTest);
+				if (!jckVersion.contains("jck8") && (spec.contains("zos") || spec.contains("aix"))) {
+					// On jck11+ z/OS and AIX set the compRefExecute file and path separators
+					// due to JCK class OsHelper bug with getFileSep() in Compiler JCK Interviewer
+					generatedJti.setProperty("jck.env.compiler.compRefExecute.fileSep", "/");
+					generatedJti.setProperty("jck.env.compiler.compRefExecute.pathSep", ":");
+				}
+			} else {
+				generatedJti.setProperty("jck.env.compiler.refExecute." + cmdAsStringOrFile, riJavaForMultiJVMCompTest);
+				if (!jckVersion.contains("jck8") && (spec.contains("zos") || spec.contains("aix"))) {
+					// On jck11+ z/OS and AIX set the refExecute file and path separators
+					// due to JCK class OsHelper bug with getFileSep() in Compiler JCK Interviewer
+					generatedJti.setProperty("jck.env.compiler.refExecute.fileSep", "/");
+					generatedJti.setProperty("jck.env.compiler.refExecute.pathSep", ":");
+				}
 			}
 
 			extraJvmOptions += suppressOutOfMemoryDumpOptions;
@@ -809,7 +822,11 @@ public class JavatestUtil {
 			
 			// Add the JVM options supplied by the user plus those added in this method to the jtb file option.
 			if (!testExecutionType.equals("multijvm")) { 
-				generatedJti.setProperty("jck.env.compiler.compRefExecute.otherOpts", extraJvmOptions + " " + jvmOpts);
+				if (jckVersionInt < 26) {
+					generatedJti.setProperty("jck.env.compiler.compRefExecute.otherOpts", extraJvmOptions + " " + jvmOpts);
+				} else {
+					generatedJti.setProperty("jck.env.compiler.refExecute.otherOpts", extraJvmOptions + " " + jvmOpts);
+				}
 			}
 		}
 		// Devtools settings

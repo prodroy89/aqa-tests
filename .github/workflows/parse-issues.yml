@@ -15,18 +15,18 @@ jobs:
       AQA_ISSUE_TRACKER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Set up Python 3.8
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: 3.8
       - name: checkout current repo
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: install reqs
         run: |
           pip install -r scripts/disabled_tests/requirements.txt
       - name: discover disabled tests
         run : |
           echo "::group::openjdk exclude files"
-          ls -1dq openjdk/excludes/* | tee exclude_files.txt
+          find openjdk/excludes -name '*ProblemList*.txt' | tee exclude_files.txt
           echo "::endgroup::"
           echo "::group::playlist files"
           find . -name "playlist.xml" -not -path "scripts" | tee playlist_files.txt
@@ -44,7 +44,7 @@ jobs:
           cat all.json | python scripts/disabled_tests/issue_status.py -v > output.json
           echo "::endgroup::"
       - name: store artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: disabled_tests
           path: output.json

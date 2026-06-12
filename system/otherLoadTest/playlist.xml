@@ -493,25 +493,6 @@
 		</groups>
 	</test>
 	<test>
-		<testCaseName>HCRLateAttachWorkload</testCaseName>
-		<variations>
-			<variation>Mode150</variation>
-			<variation>Mode650</variation>
-			<variation>Mode1000</variation>
-		</variations>
-		<command>$(SYSTEMTEST_CMD_TEMPLATE) -test=HCRLateAttachWorkload; \
-	$(TEST_STATUS)</command>
-		<levels>
-			<level>extended</level>
-		</levels>
-		<groups>
-			<group>system</group>
-		</groups>
-		<versions>
-			<version>8</version>
-		</versions>
-	</test>
-	<test>
 		<testCaseName>HCRLateAttachWorkload_previewEnabled</testCaseName>
 		<disables>
 			<disable>

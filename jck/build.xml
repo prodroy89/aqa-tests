@@ -93,7 +93,16 @@
 				<equals arg1="${os.arch}" arg2="aarch64" trim="true"/>
 			</not>
 		</and>
+	</condition> 
+	<condition property="vcvarsall_bits_arg" value="x86_64" else="">
+		<and>
+			<equals arg1="${sun.arch.data.model}" arg2="32" trim="true"/>
+			<not>
+				<equals arg1="${os.arch}" arg2="aarch64" trim="true"/>
+			</not>
+		</and>
 	</condition>
+    
 	<condition property="setup_windows_build_env" value='call "${vcvarsall_filename}" ${vcvarsall_bits_arg} &amp;&amp;' else="">
 		<equals arg1="${is_windows}" arg2="true"/>
 	</condition>

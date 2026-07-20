@@ -1,5 +1,4 @@
 <?xml version="1.0"?>
-
 <!--
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,396 +12,380 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 -->
-
 <project name="jck" default="build" basedir="." xmlns:if="ant:if" xmlns:unless="ant:unless">
-	<description>Build JCK Tests</description>
-
-	<!-- set global properties for this build -->
-	<property name="DEST" value="${BUILD_ROOT}/jck" />
-	<property environment="env" />
-
-	<condition property="isZOS" value="true">
-		<os family="z/os" />
-	</condition>
-
-	<condition property="git-prefix" value="git" else="https">
-		<isset property="isZOS"/>
-	</condition>
-	
-	<condition property="is_windows" value="true" else="false" >
-		<os family="windows" />
-	</condition>
-	
-	<condition property="src-encoding" value="IBM-1047" else="UTF-8">
-		<isset property="isZOS"/>
-	</condition>
-
-	<set-property name="JCK_GIT_BRANCH_ISSET" if-property-isset="env.JCK_GIT_BRANCH"/>
-	<condition property="jck_branch" value="${env.JCK_GIT_BRANCH}" else="main">
-		<isset property="JCK_GIT_BRANCH_ISSET"/>
-	</condition>
-	
-	<property name="jtrunner_src_dir" value="${TEST_ROOT}/jck/jtrunner"/>
-	<property name="jtrunner_bin_dir" value="${jtrunner_src_dir}/bin" /> 
-
-	<!-- Setup properties to allow projects to use a copy of Visual Studio for compiling native test cases.  -->
-	<!-- Look for either version 10.0 or 14.0 in the default installation location.  -->
-	<!-- To use a different location property rtb.vcvarsall_filename needs to be set on the command line for the build.  -->
-	<!-- The vcvarsall.bat file argument amd64 is added if the javac being used to compile the java classes is a 64 bit java. -->
-	<property name="vs14_vcvarsall_filename" location="c:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat"/>
-	<available file="${vs14_vcvarsall_filename}" property="vs14_available"/>
-	<property name="vs10_vcvarsall_filename" location="c:\\Program Files (x86)\\Microsoft Visual Studio 10.0\\VC\\vcvarsall.bat"/>
-	<available file="${vs10_vcvarsall_filename}" property="vs10_available"/>
-	<property name="vs22_pro_vcvarsall_filename" location="c:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Auxiliary\\Build\\vcvarsall.bat"/>
-	<available file="${vs22_pro_vcvarsall_filename}" property="vs22_pro_available"/>
-	<property name="vs22_bt_vcvarsall_filename" location="c:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvarsall.bat"/>
-	<available file="${vs22_bt_vcvarsall_filename}" property="vs22_bt_available"/>
-	<condition property="vcvarsall_filename" value="${vs14_vcvarsall_filename}">
-		<and>
-			<isset property="vs14_available"/>
-			<not>
-				<equals arg1="${os.arch}" arg2="aarch64" trim="true"/>
-			</not>
-		</and>
-	</condition>
-	<condition property="vcvarsall_filename" value="${vs10_vcvarsall_filename}">
-		<and>
-			<isset property="vs10_available"/>
-			<not>
-				<equals arg1="${os.arch}" arg2="aarch64" trim="true"/>
-			</not>
-		</and>
-	</condition>
-	<condition property="vcvarsall_filename" value="${vs22_pro_vcvarsall_filename}">
-		<isset property="vs22_pro_available"/>
-	</condition>
-	<condition property="vcvarsall_filename" value="${vs22_bt_vcvarsall_filename}">
-		<isset property="vs22_bt_available"/>
-	</condition>
-	<condition property="windows_native_compiler_present" value="true">
-		<isset property="vcvarsall_filename"/>
-	</condition>
-
-	<condition property="vcvarsall_bits_arg" value="arm64">
-		<equals arg1="${os.arch}" arg2="aarch64" trim="true"/>
-	</condition>
-	<condition property="vcvarsall_bits_arg" value="amd64" else="">
-		<and>
-			<equals arg1="${sun.arch.data.model}" arg2="64" trim="true"/>
-			<not>
-				<equals arg1="${os.arch}" arg2="aarch64" trim="true"/>
-			</not>
-		</and>
-	</condition> 
-	<condition property="vcvarsall_bits_arg" value="x86" else="">
-		<and>
-			<equals arg1="${sun.arch.data.model}" arg2="32" trim="true"/>
-			<not>
-				<equals arg1="${os.arch}" arg2="aarch64" trim="true"/>
-			</not>
-		</and>
-	</condition>
-    
-	<condition property="setup_windows_build_env" value='call "${vcvarsall_filename}" ${vcvarsall_bits_arg} &amp;&amp;' else="">
-		<equals arg1="${is_windows}" arg2="true"/>
-	</condition>
-	
-	<condition property="can_build_jck_natives_windows" value="true">
-		<and>
-			<available file="${jck_runtimes_src_dir}" type="dir"/>
-			<equals arg1="${is_windows}" arg2="true"/>
-			<equals arg1="${windows_native_compiler_present}" arg2="true"/>
-		</and>
-	</condition>
-	<condition property="can_build_jck_natives_unix" value="true">
-		<and>
-			<available file="${jck_runtimes_src_dir}" type="dir"/>
-			<not>
-				<equals arg1="${is_windows}" arg2="true"/>
-			</not>
-		</and>
-	</condition>
-	
-	<target name="stage-jck-material">
-		<!-- Starting downloading or updating JCK materials based on JCK GIT REPO and JCK VERSION-->
-
-		<!-- Phase 1: If JCK dir exists and we're not skipping, check git status -->
-		<condition property="jck_dir_exists_phase1">
-			<available file="${JCK_ROOT_USED}" type="dir"/>
-		</condition>
-		<condition property="skip_jck_git_update">
-			<equals arg1="${env.SKIP_JCK_GIT_UPDATE}" arg2="true"/>
-		</condition>
-		<condition property="jck_exists_and_check">
-			<and>
-				<isset property="jck_dir_exists_phase1"/>
-				<not><isset property="skip_jck_git_update"/></not>
-			</and>
-		</condition>
-
-		<echo message="env.SKIP_JCK_GIT_UPDATE is set to true. Skip Running git checks at ${JCK_ROOT_USED}. Continue." if:set="skip_jck_git_update"/>
-
-		<!--Obtain local and remote SHA to figure out if local materials are up-to-date-->
-		<exec executable="git" dir="${JCK_ROOT_USED}" failonerror="false" outputproperty="localSHA" resultproperty="return.code" if:set="jck_exists_and_check">
-			<arg line="rev-parse"/>
-			<arg line="HEAD"/>
-		</exec>
-		<condition property="git_check_failed">
-			<and>
-				<isset property="jck_exists_and_check"/>
-				<not><equals arg1="${return.code}" arg2="0"/></not>
-			</and>
-		</condition>
-		<condition property="git_check_passed">
-			<and>
-				<isset property="jck_exists_and_check"/>
-				<equals arg1="${return.code}" arg2="0"/>
-			</and>
-		</condition>
-		<echo message="Error: Git command failed with return code ${return.code}. Delete the directory and continue." if:set="git_check_failed"/>
-		<delete dir="${JCK_ROOT_USED}" failonerror="true" if:set="git_check_failed"/>
-
-		<exec executable="git" dir="${JCK_ROOT_USED}" failonerror="true" outputproperty="remoteSHA" if:set="git_check_passed">
-			<arg line="ls-remote"/>
-			<arg line="${JCK_GIT_REPO_USED}"/>
-			<arg line="${jck_branch}"/>
-		</exec>
-		<loadresource property="localSHATrimmed" if:set="git_check_passed">
-			<propertyresource name="localSHA"/>
-				<filterchain>
-				<tokenfilter>
-					<trim/>
-				</tokenfilter>
-				<striplinebreaks/>
-			</filterchain>
-		</loadresource>
-		<echo message="LocalSHA = --${localSHATrimmed}--" if:set="git_check_passed"/>
-		<echo message="RemoteSHA= --${remoteSHA}--" if:set="git_check_passed"/>
-		<condition property="local-material-uptodate">
-			<and>
-				<isset property="git_check_passed"/>
-				<contains string="${remoteSHA}" substring="${localSHATrimmed}" />
-			</and>
-		</condition>
-
-		<!-- Phase 2: Clone or update based on current state -->
-		<condition property="jck_dir_exists_phase2">
-			<available file="${JCK_ROOT_USED}" type="dir"/>
-		</condition>
-
-		<!-- If dir doesn't exist, clone it -->
-		<echo message="${JCK_ROOT_USED} does not exist, clone from ${JCK_GIT_REPO_USED}, ${jck_branch} branch, to ${JCK_ROOT_USED}" unless:set="jck_dir_exists_phase2"/>
-		<mkdir dir="${JCK_ROOT_USED}/.." unless:set="jck_dir_exists_phase2"/>
-		<exec executable="git" dir="${JCK_ROOT_USED}/.." failonerror="true" unless:set="jck_dir_exists_phase2">
-			<arg value="clone" />
-			<arg value="--single-branch" />
-			<arg value="-b"/>
-			<arg value="${jck_branch}"/>
-			<arg value="${JCK_GIT_REPO_USED}" />
-			<arg value="${JCK_ROOT_USED}" />
-		</exec>
-
-		<!-- If dir exists and we should update -->
-		<condition property="jck_exists_and_should_update">
-			<and>
-				<isset property="jck_dir_exists_phase2"/>
-				<not><isset property="skip_jck_git_update"/></not>
-			</and>
-		</condition>
-		<echo message="env.SKIP_JCK_GIT_UPDATE is set to true. Skip Running git update at ${JCK_ROOT_USED}. Continue." if:set="skip_jck_git_update"/>
-		<echo message="Local JCK materials up-to-date. Skipping update" if:set="local-material-uptodate"/>
-
-		<condition property="jck_needs_update">
-			<and>
-				<isset property="jck_exists_and_should_update"/>
-				<not><isset property="local-material-uptodate"/></not>
-			</and>
-		</condition>
-
-		<!-- Delete natives before update if they exist -->
-		<condition property="jck_natives_exist">
-			<and>
-				<isset property="jck_needs_update"/>
-				<available file="${JCK_ROOT_USED}/natives" type="dir"/>
-			</and>
-		</condition>
-		<echo message="Deleting ${JCK_ROOT_USED}/natives..." if:set="jck_natives_exist"/>
-		<delete includeEmptyDirs="true" if:set="jck_natives_exist">
-			<fileset dir="${JCK_ROOT_USED}/natives"/>
-		</delete>
-
-		<echo message="Updating ${JCK_ROOT_USED} with latest..." if:set="jck_needs_update"/>
-		<exec executable="git" dir="${JCK_ROOT_USED}" failonerror="false" resultproperty="pull.return.code" if:set="jck_needs_update">
-			<arg value="pull" />
-			<arg value="${JCK_GIT_REPO_USED}" />
-			<arg value="${jck_branch}" />
-		</exec>
-		<condition property="pull_failed">
-			<and>
-				<isset property="jck_needs_update"/>
-				<not><equals arg1="${pull.return.code}" arg2="0"/></not>
-			</and>
-		</condition>
-		<echo message="Performing hard reset..." if:set="pull_failed"/>
-		<exec executable="git" dir="${JCK_ROOT_USED}" failonerror="true" if:set="pull_failed">
-			<arg value="reset" />
-			<arg value="--hard" />
-			<arg value="origin/main" />
-		</exec>
-		<exec executable="git" dir="${JCK_ROOT_USED}" failonerror="true" if:set="pull_failed">
-			<arg value="clean" />
-			<arg value="-f" />
-			<arg value="-d" />
-		</exec>
-		<exec executable="git" dir="${JCK_ROOT_USED}" failonerror="true" if:set="pull_failed">
-			<arg value="pull" />
-			<arg value="${JCK_GIT_REPO_USED}" />
-			<arg value="${jck_branch}" />
-		</exec>
-
-		<!-- Phase 3: z/OS specific git attribute handling -->
-		<condition property="zos_needs_reset">
-			<and>
-				<isset property="isZOS"/>
-				<not><isset property="local-material-uptodate"/></not>
-			</and>
-		</condition>
-		<echo message="Local JCK materials up-to-date. Skipping hard reset" if:set="local-material-uptodate"/>
-		<echo message="Performing hard reset of ${JCK_ROOT_USED} using .gitattributes.zos for file conversions..." if:set="zos_needs_reset"/>
-		<delete includeemptydirs="true" failonerror="false" if:set="zos_needs_reset">
-			<fileset dir="${JCK_ROOT_USED}/.git/info" includes="**/*"/>
-		</delete>
-		<mkdir dir="${JCK_ROOT_USED}/.git/info" if:set="zos_needs_reset"/>
-		<move file="${JCK_ROOT_USED}/.gitattributes.zos" tofile="${JCK_ROOT_USED}/.git/info/attributes" if:set="zos_needs_reset"/>
-		<exec executable="git" dir="${JCK_ROOT_USED}" failonerror="false" if:set="zos_needs_reset">
-			<arg value="rm" />
-			<arg value="--cached" />
-			<arg value="-r" />
-			<arg value="-q" />
-			<arg value="." />
-		</exec>
-		<exec executable="git" dir="${JCK_ROOT_USED}" failonerror="false" if:set="zos_needs_reset">
-			<arg value="reset" />
-			<arg value="--hard" />
-		</exec>
+    <description>Build JCK Tests</description>
+    <!-- set global properties for this build -->
+    <property name="DEST" value="${BUILD_ROOT}/jck"/>
+    <property environment="env"/>
+    <condition property="isZOS" value="true">
+        <os family="z/os"/>
+    </condition>
+    <condition property="git-prefix" value="git" else="https">
+        <isset property="isZOS"/>
+    </condition>
+    <condition property="is_windows" value="true" else="false">
+        <os family="windows"/>
+    </condition>
+    <condition property="src-encoding" value="IBM-1047" else="UTF-8">
+        <isset property="isZOS"/>
+    </condition>
+    <set-property name="JCK_GIT_BRANCH_ISSET" if-property-isset="env.JCK_GIT_BRANCH"/>
+    <condition property="jck_branch" value="${env.JCK_GIT_BRANCH}" else="main">
+        <isset property="JCK_GIT_BRANCH_ISSET"/>
+    </condition>
+    <property name="jtrunner_src_dir" value="${TEST_ROOT}/jck/jtrunner"/>
+    <property name="jtrunner_bin_dir" value="${jtrunner_src_dir}/bin"/>
+    <!-- Setup properties to allow projects to use a copy of Visual Studio for compiling native test cases.  -->
+    <!-- Look for either version 10.0 or 14.0 in the default installation location.  -->
+    <!-- To use a different location property rtb.vcvarsall_filename needs to be set on the command line for the build.  -->
+    <!-- The vcvarsall.bat file argument amd64 is added if the javac being used to compile the java classes is a 64 bit java. -->
+    <property name="vs14_vcvarsall_filename" location="c:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat"/>
+    <available file="${vs14_vcvarsall_filename}" property="vs14_available"/>
+    <property name="vs10_vcvarsall_filename" location="c:\\Program Files (x86)\\Microsoft Visual Studio 10.0\\VC\\vcvarsall.bat"/>
+    <available file="${vs10_vcvarsall_filename}" property="vs10_available"/>
+    <property name="vs22_pro_vcvarsall_filename" location="c:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Auxiliary\\Build\\vcvarsall.bat"/>
+    <available file="${vs22_pro_vcvarsall_filename}" property="vs22_pro_available"/>
+    <property name="vs22_bt_vcvarsall_filename" location="c:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvarsall.bat"/>
+    <available file="${vs22_bt_vcvarsall_filename}" property="vs22_bt_available"/>
+    <condition property="vcvarsall_filename" value="${vs14_vcvarsall_filename}">
+        <and>
+            <isset property="vs14_available"/>
+            <not>
+                <equals arg1="${os.arch}" arg2="aarch64" trim="true"/>
+            </not>
+        </and>
+    </condition>
+    <condition property="vcvarsall_filename" value="${vs10_vcvarsall_filename}">
+        <and>
+            <isset property="vs10_available"/>
+            <not>
+                <equals arg1="${os.arch}" arg2="aarch64" trim="true"/>
+            </not>
+        </and>
+    </condition>
+    <condition property="vcvarsall_filename" value="${vs22_pro_vcvarsall_filename}">
+        <isset property="vs22_pro_available"/>
+    </condition>
+    <condition property="vcvarsall_filename" value="${vs22_bt_vcvarsall_filename}">
+        <isset property="vs22_bt_available"/>
+    </condition>
+    <condition property="windows_native_compiler_present" value="true">
+        <isset property="vcvarsall_filename"/>
+    </condition>
+    <!-- ====================================================== -->
+    <!-- Visual Studio architecture selection                    -->
+    <!-- ====================================================== -->
+    <!-- ARM64 -->
+    <condition property="vcvarsall_bits_arg" value="arm64">
+        <equals arg1="${os.arch}" arg2="aarch64" trim="true"/>
+    </condition>
+    <!-- 32-bit JVM -->
+    <condition property="vcvarsall_bits_arg" value="x86">
+        <and>
+            <not>
+                <isset property="vcvarsall_bits_arg"/>
+            </not>
+            <equals arg1="${sun.arch.data.model}" arg2="32" trim="true"/>
+        </and>
+    </condition>
+    <!-- 64-bit JVM -->
+    <condition property="vcvarsall_bits_arg" value="amd64">
+        <and>
+            <not>
+                <isset property="vcvarsall_bits_arg"/>
+            </not>
+            <equals arg1="${sun.arch.data.model}" arg2="64" trim="true"/>
+        </and>
+    </condition>
+    <!-- Final fallback -->
+    <property name="vcvarsall_bits_arg" value="amd64"/>
+    <echo message="========================================"/>
+    <echo message="os.arch=${os.arch}"/>
+    <echo message="sun.arch.data.model=${sun.arch.data.model}"/>
+    <echo message="vcvarsall_filename=${vcvarsall_filename}"/>
+    <echo message="vcvarsall_bits_arg=${vcvarsall_bits_arg}"/>
+    <echo message="========================================"/>
+    <condition property="setup_windows_build_env" value='call "${vcvarsall_filename}" ${vcvarsall_bits_arg} &amp;&amp; where cl &amp;&amp;' else="">
+        <and>
+            <equals arg1="${is_windows}" arg2="true"/>
+            <isset property="vcvarsall_filename"/>
+        </and>
+    </condition>
+    <condition property="can_build_jck_natives_windows" value="true">
+        <and>
+            <available file="${jck_runtimes_src_dir}" type="dir"/>
+            <equals arg1="${is_windows}" arg2="true"/>
+            <equals arg1="${windows_native_compiler_present}" arg2="true"/>
+        </and>
+    </condition>
+    <condition property="can_build_jck_natives_unix" value="true">
+        <and>
+            <available file="${jck_runtimes_src_dir}" type="dir"/>
+            <not>
+                <equals arg1="${is_windows}" arg2="true"/>
+            </not>
+        </and>
+    </condition>
+    <target name="stage-jck-material">
+        <!-- Starting downloading or updating JCK materials based on JCK GIT REPO and JCK VERSION-->
+        <!-- Phase 1: If JCK dir exists and we're not skipping, check git status -->
+        <condition property="jck_dir_exists_phase1">
+            <available file="${JCK_ROOT_USED}" type="dir"/>
+        </condition>
+        <condition property="skip_jck_git_update">
+            <equals arg1="${env.SKIP_JCK_GIT_UPDATE}" arg2="true"/>
+        </condition>
+        <condition property="jck_exists_and_check">
+            <and>
+                <isset property="jck_dir_exists_phase1"/>
+                <not>
+                    <isset property="skip_jck_git_update"/>
+                </not>
+            </and>
+        </condition>
+        <echo message="env.SKIP_JCK_GIT_UPDATE is set to true. Skip Running git checks at ${JCK_ROOT_USED}. Continue." if:set="skip_jck_git_update"/>
+        <!--Obtain local and remote SHA to figure out if local materials are up-to-date-->
+        <exec executable="git" dir="${JCK_ROOT_USED}" failonerror="false" outputproperty="localSHA" resultproperty="return.code" if:set="jck_exists_and_check">
+            <arg line="rev-parse"/>
+            <arg line="HEAD"/>
+        </exec>
+        <condition property="git_check_failed">
+            <and>
+                <isset property="jck_exists_and_check"/>
+                <not>
+                    <equals arg1="${return.code}" arg2="0"/>
+                </not>
+            </and>
+        </condition>
+        <condition property="git_check_passed">
+            <and>
+                <isset property="jck_exists_and_check"/>
+                <equals arg1="${return.code}" arg2="0"/>
+            </and>
+        </condition>
+        <echo message="Error: Git command failed with return code ${return.code}. Delete the directory and continue." if:set="git_check_failed"/>
+        <delete dir="${JCK_ROOT_USED}" failonerror="true" if:set="git_check_failed"/>
+        <exec executable="git" dir="${JCK_ROOT_USED}" failonerror="true" outputproperty="remoteSHA" if:set="git_check_passed">
+            <arg line="ls-remote"/>
+            <arg line="${JCK_GIT_REPO_USED}"/>
+            <arg line="${jck_branch}"/>
+        </exec>
+        <loadresource property="localSHATrimmed" if:set="git_check_passed">
+            <propertyresource name="localSHA"/>
+            <filterchain>
+                <tokenfilter>
+                    <trim/>
+                </tokenfilter>
+                <striplinebreaks/>
+            </filterchain>
+        </loadresource>
+        <echo message="LocalSHA = --${localSHATrimmed}--" if:set="git_check_passed"/>
+        <echo message="RemoteSHA= --${remoteSHA}--" if:set="git_check_passed"/>
+        <condition property="local-material-uptodate">
+            <and>
+                <isset property="git_check_passed"/>
+                <contains string="${remoteSHA}" substring="${localSHATrimmed}"/>
+            </and>
+        </condition>
+        <!-- Phase 2: Clone or update based on current state -->
+        <condition property="jck_dir_exists_phase2">
+            <available file="${JCK_ROOT_USED}" type="dir"/>
+        </condition>
+        <!-- If dir doesn't exist, clone it -->
+        <echo message="${JCK_ROOT_USED} does not exist, clone from ${JCK_GIT_REPO_USED}, ${jck_branch} branch, to ${JCK_ROOT_USED}" unless:set="jck_dir_exists_phase2"/>
+        <mkdir dir="${JCK_ROOT_USED}/.." unless:set="jck_dir_exists_phase2"/>
+        <exec executable="git" dir="${JCK_ROOT_USED}/.." failonerror="true" unless:set="jck_dir_exists_phase2">
+            <arg value="clone"/>
+            <arg value="--single-branch"/>
+            <arg value="-b"/>
+            <arg value="${jck_branch}"/>
+            <arg value="${JCK_GIT_REPO_USED}"/>
+            <arg value="${JCK_ROOT_USED}"/>
+        </exec>
+        <!-- If dir exists and we should update -->
+        <condition property="jck_exists_and_should_update">
+            <and>
+                <isset property="jck_dir_exists_phase2"/>
+                <not>
+                    <isset property="skip_jck_git_update"/>
+                </not>
+            </and>
+        </condition>
+        <echo message="env.SKIP_JCK_GIT_UPDATE is set to true. Skip Running git update at ${JCK_ROOT_USED}. Continue." if:set="skip_jck_git_update"/>
+        <echo message="Local JCK materials up-to-date. Skipping update" if:set="local-material-uptodate"/>
+        <condition property="jck_needs_update">
+            <and>
+                <isset property="jck_exists_and_should_update"/>
+                <not>
+                    <isset property="local-material-uptodate"/>
+                </not>
+            </and>
+        </condition>
+        <!-- Delete natives before update if they exist -->
+        <condition property="jck_natives_exist">
+            <and>
+                <isset property="jck_needs_update"/>
+                <available file="${JCK_ROOT_USED}/natives" type="dir"/>
+            </and>
+        </condition>
+        <echo message="Deleting ${JCK_ROOT_USED}/natives..." if:set="jck_natives_exist"/>
+        <delete includeEmptyDirs="true" if:set="jck_natives_exist">
+            <fileset dir="${JCK_ROOT_USED}/natives"/>
+        </delete>
+        <echo message="Updating ${JCK_ROOT_USED} with latest..." if:set="jck_needs_update"/>
+        <exec executable="git" dir="${JCK_ROOT_USED}" failonerror="false" resultproperty="pull.return.code" if:set="jck_needs_update">
+            <arg value="pull"/>
+            <arg value="${JCK_GIT_REPO_USED}"/>
+            <arg value="${jck_branch}"/>
+        </exec>
+        <condition property="pull_failed">
+            <and>
+                <isset property="jck_needs_update"/>
+                <not>
+                    <equals arg1="${pull.return.code}" arg2="0"/>
+                </not>
+            </and>
+        </condition>
+        <echo message="Performing hard reset..." if:set="pull_failed"/>
+        <exec executable="git" dir="${JCK_ROOT_USED}" failonerror="true" if:set="pull_failed">
+            <arg value="reset"/>
+            <arg value="--hard"/>
+            <arg value="origin/main"/>
+        </exec>
+        <exec executable="git" dir="${JCK_ROOT_USED}" failonerror="true" if:set="pull_failed">
+            <arg value="clean"/>
+            <arg value="-f"/>
+            <arg value="-d"/>
+        </exec>
+        <exec executable="git" dir="${JCK_ROOT_USED}" failonerror="true" if:set="pull_failed">
+            <arg value="pull"/>
+            <arg value="${JCK_GIT_REPO_USED}"/>
+            <arg value="${jck_branch}"/>
+        </exec>
+        <!-- Phase 3: z/OS specific git attribute handling -->
+        <condition property="zos_needs_reset">
+            <and>
+                <isset property="isZOS"/>
+                <not>
+                    <isset property="local-material-uptodate"/>
+                </not>
+            </and>
+        </condition>
+        <echo message="Local JCK materials up-to-date. Skipping hard reset" if:set="local-material-uptodate"/>
+        <echo message="Performing hard reset of ${JCK_ROOT_USED} using .gitattributes.zos for file conversions..." if:set="zos_needs_reset"/>
+        <delete includeemptydirs="true" failonerror="false" if:set="zos_needs_reset">
+            <fileset dir="${JCK_ROOT_USED}/.git/info" includes="**/*"/>
+        </delete>
+        <mkdir dir="${JCK_ROOT_USED}/.git/info" if:set="zos_needs_reset"/>
+        <move file="${JCK_ROOT_USED}/.gitattributes.zos" tofile="${JCK_ROOT_USED}/.git/info/attributes" if:set="zos_needs_reset"/>
+        <exec executable="git" dir="${JCK_ROOT_USED}" failonerror="false" if:set="zos_needs_reset">
+            <arg value="rm"/>
+            <arg value="--cached"/>
+            <arg value="-r"/>
+            <arg value="-q"/>
+            <arg value="."/>
+        </exec>
+        <exec executable="git" dir="${JCK_ROOT_USED}" failonerror="false" if:set="zos_needs_reset">
+            <arg value="reset"/>
+            <arg value="--hard"/>
+        </exec>
+    </target>
+    <target name="build-jck-natives" depends="setup-native-build-command, build-natives-windows, build-natives-unix"> 
 	</target>
-	
-	<target name="build-jck-natives" depends="setup-native-build-command, build-natives-windows, build-natives-unix"> 
-	</target>
-		
-	<target name="setup-native-build-command">
-		<echo message="Building jck natives"/>
-		<property name="openjdk_test_jck_native_build_command" value='${setup_windows_build_env}make build -f ${jtrunner_src_dir}/makefile SRCDIR=${jck_runtimes_src_dir} JAVA_HOME=${TEST_JDK_HOME} OUTDIR=${JCK_ROOT_USED}/natives'/>
-		<tempfile property="openjdk_test_jck_native_build_command_file" destDir="${java.io.tmpdir}" prefix="openjdk.build.command."/>
-	</target>
-
-	<target name="build-natives-windows" if="can_build_jck_natives_windows">
-		<echo message="${openjdk_test_jck_native_build_command}" file="${openjdk_test_jck_native_build_command_file}.bat"/>
-		<exec executable="${openjdk_test_jck_native_build_command_file}.bat" failonerror="true"/>
-		<delete file="${openjdk_test_jck_native_build_command_file}.bat" verbose="true"/>
-	</target>
-
-	<target name="build-natives-unix" if="can_build_jck_natives_unix">
-		<echo message="${openjdk_test_jck_native_build_command}" file="${openjdk_test_jck_native_build_command_file}.sh"/>
-		<exec executable="/bin/sh" failonerror="true">
-			<arg value="${openjdk_test_jck_native_build_command_file}.sh"/>
-		</exec>
-		<delete file="${openjdk_test_jck_native_build_command_file}.sh" verbose="true"/>
-	</target>
-	
-	<target name="build-jtrunner" depends="build-jck-natives, create-bin-dir">
-		<javac srcdir="${jtrunner_src_dir}"
-			   destdir="${jtrunner_bin_dir}"
-			   fork="true"
-			   debug="true"
-			   encoding="ISO-8859-1"
-			   includeantruntime="false"
-			   failonerror="true">
-			<compilerarg value="-Xlint:deprecation,unchecked" />
-			<include name="**/*.java"/>
-		</javac>
-	</target>
-
-	<target name="dist" depends="build-jtrunner" description="generate the distribution">
-		<copy todir="${DEST}">
-			<fileset dir="${basedir}">
-				<exclude name="jck_root/" />
-				<exclude name="README.md" />
-			</fileset>
-		</copy>
-	</target>
-
-	<target name="build">
-		<condition property="skip_jck_git_update_build">
-			<equals arg1="${env.SKIP_JCK_GIT_UPDATE}" arg2="true"/>
-		</condition>
-		<echo message="=== SKIP_JCK_GIT_UPDATE set to true, not enforcing existence of env.JCK_GIT_REPO ===" if:set="skip_jck_git_update_build"/>
-		<fail message="env.JCK_GIT_REPO: ${env.JCK_GIT_REPO} was not correctly set for running JCK tests. If you do not want to compile JCK tests, please use BUILD_LIST to include test folders you want to test." unless:set="skip_jck_git_update_build">
-			<condition>
-				<not>
-					<isset property="env.JCK_GIT_REPO"/>
-				</not>
-			</condition>
-		</fail>
-
-		<!-- Replace JCKnext-unzipped.git with JCK${JDK_VERSION}-unzipped.git in repo URL -->
-		<loadresource property="JCK_GIT_REPO_USED">
-			<propertyresource name="env.JCK_GIT_REPO"/>
-			<filterchain>
-				<tokenfilter>
-					<replaceregex pattern="(?i)JCKnext-unzipped\.git" replace="JCK${JDK_VERSION}-unzipped.git"/>
-				</tokenfilter>
-			</filterchain>
-		</loadresource>
-		<echo>=== JCK_GIT_REPO_USED is set to ${JCK_GIT_REPO_USED} ===</echo>
-
-		<condition property="JCK_ROOT_RELATIVE_PATH" value="${env.JCK_ROOT}" else="${basedir}/../../../../jck_root/JCK${JDK_VERSION}-unzipped">
-			<isset property="env.JCK_ROOT" />
-		</condition>
-
-		<property name="JCK_ROOT_USED" location="${JCK_ROOT_RELATIVE_PATH}"/>
-
-		<echo>=== JCK_ROOT_USED is set to ${JCK_ROOT_USED} ===</echo>
-		<!-- Determine JCK_VERSION_USED: use env if set, otherwise derive from JDK_VERSION -->
-		<set-property name="JCK_VERSION_ISSET" if-property-isset="env.JCK_VERSION"/>
-		<condition property="JCK_VERSION_USED" value="${env.JCK_VERSION}">
-			<isset property="JCK_VERSION_ISSET"/>
-		</condition>
-		<condition property="JCK_VERSION_USED" value="jck8d">
-			<equals arg1="${JDK_VERSION}" arg2="8"/>
-		</condition>
-		<condition property="JCK_VERSION_USED" value="jck11a">
-			<equals arg1="${JDK_VERSION}" arg2="11"/>
-		</condition>
-		<condition property="JCK_VERSION_USED" value="jck17a">
-			<equals arg1="${JDK_VERSION}" arg2="17"/>
-		</condition>
-		<property name="JCK_VERSION_USED" value="jck${JDK_VERSION}"/>
-		<echo>=== JCK_VERSION_USED is set to ${JCK_VERSION_USED} ===</echo>
-
-		<!-- Extract short version from JCK_VERSION_USED (e.g. "jck8d" -> "8d") -->
-		<loadresource property="jck_short_version">
-			<propertyresource name="JCK_VERSION_USED"/>
-			<filterchain>
-				<tokenfilter>
-					<replaceregex pattern="jck([^\.]*)" replace="\1" flags="i"/>
-				</tokenfilter>
-			</filterchain>
-		</loadresource>
-		<property name="jck_runtimes_src_dir" value="${JCK_ROOT_USED}/JCK-runtime-${jck_short_version}"/>
-		
-		<echo>start staging jck materials</echo>
-		<antcall target="stage-jck-material" inheritall="true" />
-		<echo>start building Javatest Runner and jck natives</echo>
-		<antcall target="dist" inheritall="true" />
-	</target>
-	
-	<target name="create-bin-dir">
-		<mkdir dir="${jtrunner_bin_dir}"/>
-	</target>
-
-	<target name="clean">
-		<ant antfile="${SYSTEMTEST_ROOT}/aqa-systemtest/openjdk.build/build.xml" dir="${SYSTEMTEST_ROOT}/aqa-systemtest/openjdk.build" inheritAll="false" target="clean"></ant>
-		<ant antfile="${SYSTEMTEST_ROOT}/stf/stf.build/build.xml" dir="${SYSTEMTEST_ROOT}/stf/stf.build" inheritAll="false" target="clean"></ant>
-	</target>
+    <target name="setup-native-build-command">
+        <echo message="Building jck natives"/>
+        <property name="openjdk_test_jck_native_build_command" value='${setup_windows_build_env}make build -f ${jtrunner_src_dir}/makefile SRCDIR=${jck_runtimes_src_dir} JAVA_HOME=${TEST_JDK_HOME} OUTDIR=${JCK_ROOT_USED}/natives'/>
+        <tempfile property="openjdk_test_jck_native_build_command_file" destDir="${java.io.tmpdir}" prefix="openjdk.build.command."/>
+    </target>
+    <target name="build-natives-windows" if="can_build_jck_natives_windows">
+        <echo message="${openjdk_test_jck_native_build_command}" file="${openjdk_test_jck_native_build_command_file}.bat"/>
+        <exec executable="${openjdk_test_jck_native_build_command_file}.bat" failonerror="true"/>
+        <delete file="${openjdk_test_jck_native_build_command_file}.bat" verbose="true"/>
+    </target>
+    <target name="build-natives-unix" if="can_build_jck_natives_unix">
+        <echo message="${openjdk_test_jck_native_build_command}" file="${openjdk_test_jck_native_build_command_file}.sh"/>
+        <exec executable="/bin/sh" failonerror="true">
+            <arg value="${openjdk_test_jck_native_build_command_file}.sh"/>
+        </exec>
+        <delete file="${openjdk_test_jck_native_build_command_file}.sh" verbose="true"/>
+    </target>
+    <target name="build-jtrunner" depends="build-jck-natives, create-bin-dir">
+        <javac srcdir="${jtrunner_src_dir}" destdir="${jtrunner_bin_dir}" fork="true" debug="true" encoding="ISO-8859-1" includeantruntime="false" failonerror="true">
+            <compilerarg value="-Xlint:deprecation,unchecked"/>
+            <include name="**/*.java"/>
+        </javac>
+    </target>
+    <target name="dist" depends="build-jtrunner" description="generate the distribution">
+        <copy todir="${DEST}">
+            <fileset dir="${basedir}">
+                <exclude name="jck_root/"/>
+                <exclude name="README.md"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="build">
+        <condition property="skip_jck_git_update_build">
+            <equals arg1="${env.SKIP_JCK_GIT_UPDATE}" arg2="true"/>
+        </condition>
+        <echo message="=== SKIP_JCK_GIT_UPDATE set to true, not enforcing existence of env.JCK_GIT_REPO ===" if:set="skip_jck_git_update_build"/>
+        <fail message="env.JCK_GIT_REPO: ${env.JCK_GIT_REPO} was not correctly set for running JCK tests. If you do not want to compile JCK tests, please use BUILD_LIST to include test folders you want to test." unless:set="skip_jck_git_update_build">
+            <condition>
+                <not>
+                    <isset property="env.JCK_GIT_REPO"/>
+                </not>
+            </condition>
+        </fail>
+        <!-- Replace JCKnext-unzipped.git with JCK${JDK_VERSION}-unzipped.git in repo URL -->
+        <loadresource property="JCK_GIT_REPO_USED">
+            <propertyresource name="env.JCK_GIT_REPO"/>
+            <filterchain>
+                <tokenfilter>
+                    <replaceregex pattern="(?i)JCKnext-unzipped\.git" replace="JCK${JDK_VERSION}-unzipped.git"/>
+                </tokenfilter>
+            </filterchain>
+        </loadresource>
+        <echo>=== JCK_GIT_REPO_USED is set to ${JCK_GIT_REPO_USED} ===</echo>
+        <condition property="JCK_ROOT_RELATIVE_PATH" value="${env.JCK_ROOT}" else="${basedir}/../../../../jck_root/JCK${JDK_VERSION}-unzipped">
+            <isset property="env.JCK_ROOT"/>
+        </condition>
+        <property name="JCK_ROOT_USED" location="${JCK_ROOT_RELATIVE_PATH}"/>
+        <echo>=== JCK_ROOT_USED is set to ${JCK_ROOT_USED} ===</echo>
+        <!-- Determine JCK_VERSION_USED: use env if set, otherwise derive from JDK_VERSION -->
+        <set-property name="JCK_VERSION_ISSET" if-property-isset="env.JCK_VERSION"/>
+        <condition property="JCK_VERSION_USED" value="${env.JCK_VERSION}">
+            <isset property="JCK_VERSION_ISSET"/>
+        </condition>
+        <condition property="JCK_VERSION_USED" value="jck8d">
+            <equals arg1="${JDK_VERSION}" arg2="8"/>
+        </condition>
+        <condition property="JCK_VERSION_USED" value="jck11a">
+            <equals arg1="${JDK_VERSION}" arg2="11"/>
+        </condition>
+        <condition property="JCK_VERSION_USED" value="jck17a">
+            <equals arg1="${JDK_VERSION}" arg2="17"/>
+        </condition>
+        <property name="JCK_VERSION_USED" value="jck${JDK_VERSION}"/>
+        <echo>=== JCK_VERSION_USED is set to ${JCK_VERSION_USED} ===</echo>
+        <!-- Extract short version from JCK_VERSION_USED (e.g. "jck8d" -> "8d") -->
+        <loadresource property="jck_short_version">
+            <propertyresource name="JCK_VERSION_USED"/>
+            <filterchain>
+                <tokenfilter>
+                    <replaceregex pattern="jck([^\.]*)" replace="\1" flags="i"/>
+                </tokenfilter>
+            </filterchain>
+        </loadresource>
+        <property name="jck_runtimes_src_dir" value="${JCK_ROOT_USED}/JCK-runtime-${jck_short_version}"/>
+        <echo>start staging jck materials</echo>
+        <antcall target="stage-jck-material" inheritall="true"/>
+        <echo>start building Javatest Runner and jck natives</echo>
+        <antcall target="dist" inheritall="true"/>
+    </target>
+    <target name="create-bin-dir">
+        <mkdir dir="${jtrunner_bin_dir}"/>
+    </target>
+    <target name="clean">
+        <ant antfile="${SYSTEMTEST_ROOT}/aqa-systemtest/openjdk.build/build.xml" dir="${SYSTEMTEST_ROOT}/aqa-systemtest/openjdk.build" inheritAll="false" target="clean"/>
+        <ant antfile="${SYSTEMTEST_ROOT}/stf/stf.build/build.xml" dir="${SYSTEMTEST_ROOT}/stf/stf.build" inheritAll="false" target="clean"/>
+    </target>
 </project>

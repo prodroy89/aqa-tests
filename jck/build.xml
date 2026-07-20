@@ -94,7 +94,7 @@
 			</not>
 		</and>
 	</condition> 
-	<condition property="vcvarsall_bits_arg" value="x86_64" else="">
+	<condition property="vcvarsall_bits_arg" value="x86" else="">
 		<and>
 			<equals arg1="${sun.arch.data.model}" arg2="32" trim="true"/>
 			<not>

@@ -1241,16 +1241,6 @@
 		<groups>
 			<group>jck</group>
 		</groups>
-		<disables>
-			<disable>
-				<comment>https://github.ibm.com/runtimes/backlog/issues/600</comment>
-				<impl>openj9</impl>
-			</disable>
-			<disable>
-				<comment>https://github.ibm.com/runtimes/backlog/issues/600</comment>
-				<impl>ibm</impl>
-			</disable>
-		</disables>
 	</test>
 	<test>
 		<testCaseName>jck-runtime-api-org_ietf</testCaseName>

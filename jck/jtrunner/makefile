@@ -28,6 +28,16 @@
 OS:=$(shell uname -s | tr "[:upper:]" "[:lower:]")
 ARCH:=$(shell uname -m | tr "[:upper:]" "[:lower:]")
 
+# Normalize Linux 32-bit x86 architecture names
+ifeq ($(OS),linux)
+    ifneq (,$(filter i386 i486 i586 i686,$(ARCH)))
+        ARCH:=x86
+    endif
+endif
+
+# Allow explicitly specifying the target native library architecture
+TARGET_ARCH ?= $(ARCH)
+
 # We need to determine if the platform is Alpine Linux or not
 ifeq ($(OS),linux)
 	ifneq (,$(wildcard /etc/alpine-release))
@@ -58,6 +68,7 @@ endif
 
 $(info OS is $(OS))
 $(info ARCH is $(ARCH))
+$(info TARGET_ARCH is $(TARGET_ARCH))
 
 ifeq ($(OS),win)
 	DESTDIR=$(OUTDIR)\$(OS)
@@ -156,21 +167,29 @@ SRC_PATH=$(SRCDIR)/src
 
 CC=gcc
 CFLAGS=-fPIC -I$(SOLARIS_PATH) -I$(LINUX_PATH) -I$(SRC_PATH)
-LDFLAGS=-shared 
+LDFLAGS=-shared
 
-# need to add c99 flags for p/zlinux as of JDK21
+ifeq ($(OS),linux)
+    ifeq ($(TARGET_ARCH),x86)
+        # Build 32-bit native libraries for Linux x86
+        CFLAGS=-m32 -fPIC -I$(SOLARIS_PATH) -I$(LINUX_PATH) -I$(SRC_PATH)
+        LDFLAGS=-m32 -shared
+    endif
+endif
+
+# Need to add c99 flags for p/zlinux as of JDK21
 ifeq ($(shell test $(JDK_VERSION) -ge 21; echo $$?),0)
-	ifeq ($(OS),linux)
-		ifeq ($(ARCH),ppc64le)
-			CFLAGS+=-std=gnu99
-		else ifeq ($(ARCH),s390x)
-			CFLAGS+=-std=gnu99
-		else ifeq ($(ARCH),x86_64)
-			CFLAGS+=-std=gnu99
+    ifeq ($(OS),linux)
+        ifeq ($(ARCH),ppc64le)
+            CFLAGS+=-std=gnu99
+        else ifeq ($(ARCH),s390x)
+            CFLAGS+=-std=gnu99
+        else ifeq ($(ARCH),x86_64)
+            CFLAGS+=-std=gnu99
         else ifeq ($(ARCH),x86)
-            CFLAGS=-fPIC -m32 -I$(SOLARIS_PATH) -I$(LINUX_PATH) -I$(SRC_PATH)       
-		endif
-	endif
+            CFLAGS+=-std=gnu99
+        endif
+    endif
 endif
 
 ifeq ($(OS),osx)

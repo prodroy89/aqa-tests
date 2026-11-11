@@ -167,6 +167,8 @@ ifeq ($(shell test $(JDK_VERSION) -ge 21; echo $$?),0)
 			CFLAGS+=-std=gnu99
 		else ifeq ($(ARCH),x86_64)
 			CFLAGS+=-std=gnu99
+        else ifeq ($(ARCH),x86)
+            CFLAGS=-fPIC -m32 -I$(SOLARIS_PATH) -I$(LINUX_PATH) -I$(SRC_PATH)       
 		endif
 	endif
 endif
